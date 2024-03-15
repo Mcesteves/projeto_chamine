@@ -2,39 +2,27 @@ from OpenGL.GL import *
 import glfw
 import numpy as np
 
-
 from camera import *
 from shader import *
-
-
-   
-def create_patch():
-  geom = np.array([
-    1.0, -1.0, 1.0,
-    0.0, 0.0, 0.0 
-  ], dtype = 'float32')
-  
-  glPatchParameteri(GL_PATCH_VERTICES, 2)
-  global vao
-  vao = glGenVertexArrays(1)
-  glBindVertexArray(vao)
-  buffer = glGenBuffers(1)
-  glBindBuffer(GL_ARRAY_BUFFER, buffer)
-  glBufferData(GL_ARRAY_BUFFER, geom.nbytes, geom, GL_STATIC_DRAW)
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
-  glEnableVertexAttribArray(0)
-
-  return vao
+from cylinder import*
 
 def initialize ():
   glClearColor(0,0,0,1)
   glEnable(GL_DEPTH_TEST)
   #glEnable(GL_CULL_FACE)
 
-  vao = create_patch()
+  global cylinder 
+  cylinder = Cylinder(np.array([
+     1.0, -1.0, 1.0,
+     2.0, 0.0, 0.0 
+   ], dtype = 'float32'))
+  global cylinder2 
+  cylinder2 = Cylinder(np.array([
+     2.0, 0.0, 0.0,
+     5.0, 3.0, 0.0 
+   ], dtype = 'float32'))
   global camera
-  camera = Camera(0.0, 3.0, 6.0)
+  camera = Camera(0.0, 0.0, 10.0)
   global shader
   shader = Shader()
   shader.attach_vertex_shader("shader/vertex.glsl")
@@ -55,9 +43,8 @@ def display ():
   shader.set_uniform("mvp",mvp)
   shader.set_uniform("mv",mv)
   shader.set_uniform("mn",mn)
-  glBindVertexArray(vao)
-  glDrawArrays(GL_PATCHES, 0, 2)
-  
+  cylinder.draw()
+  cylinder2.draw()
 
 def main():
     # Initialize the library
