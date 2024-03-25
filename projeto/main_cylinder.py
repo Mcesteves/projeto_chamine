@@ -4,25 +4,20 @@ import numpy as np
 
 from camera import *
 from shader import *
-from cylinder import*
+from curve import*
 
 def initialize ():
   glClearColor(0,0,0,1)
   glEnable(GL_DEPTH_TEST)
-  #glEnable(GL_CULL_FACE)
 
-  global cylinder 
-  cylinder = Cylinder(np.array([
-     1.0, -1.0, 1.0,
-     2.0, 0.0, 0.0 
-   ], dtype = 'float32'))
-  global cylinder2 
-  cylinder2 = Cylinder(np.array([
+  global curve
+  curve = Curve([1.0, -1.0, 1.0,
      2.0, 0.0, 0.0,
-     5.0, 3.0, 0.0 
-   ], dtype = 'float32'))
+     4.0, 3.0, 0.0,
+     3.0, 3.0, 0.0,
+     -2.0, 1.0, 1.0])
   global camera
-  camera = Camera(0.0, 0.0, 10.0)
+  camera = Camera(1.0, 0.0, 16.0)
   global shader
   shader = Shader()
   shader.attach_vertex_shader("shader/vertex.glsl")
@@ -43,8 +38,8 @@ def display ():
   shader.set_uniform("mvp",mvp)
   shader.set_uniform("mv",mv)
   shader.set_uniform("mn",mn)
-  cylinder.draw()
-  cylinder2.draw()
+
+  curve.draw()
 
 def main():
     # Initialize the library

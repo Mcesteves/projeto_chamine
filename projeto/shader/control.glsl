@@ -3,8 +3,9 @@ layout (vertices = 2) out;
 
 in vec3 pgeom[];
 
-patch out mat4 transformation[];
+patch out mat4 transformation;
 patch out float radius;
+patch out float height;
 
 void setTranslationMatrix(vec3 t, out mat4 t_matrix){
 	t_matrix = mat4(
@@ -55,16 +56,14 @@ void main(){
 	mat4 rotation_matrix;
 	mat4 scale_matrix;
 	vec3 d = pgeom[1] - pgeom[0];
+	height = length(d);
 
 	setTranslationMatrix(pgeom[0], translation_matrix);
-	setScaleMatrix(vec3(0.2f, length(d), 0.2f), scale_matrix);
 	setRotationMatrix(d, rotation_matrix);
 
-	transformation[0] = translation_matrix;
-	transformation[1] = scale_matrix;
-	transformation[2] = rotation_matrix;
+	transformation = translation_matrix*rotation_matrix;
 
-	radius = 1.0f;
+	radius = 0.2f;
 	if (gl_InvocationID == 0)
 	{
 		gl_TessLevelOuter[0] = 64;
