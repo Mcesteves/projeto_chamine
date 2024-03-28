@@ -12,7 +12,7 @@ uniform mat4 mvp;
 patch in mat4 transformation;
 patch in float radius;
 patch in float height;
-//patch in float alfa;
+patch in float alfa;
 
 out data {
 	vec3 neye;
@@ -26,13 +26,14 @@ void main(){
 	
 	vec4 vpos;
 	vec4 vnorm;
-	float R = 1.0f;
+	float phi;
+	float R = 0.8f;
 
 	if (gl_TessCoord.y > 0.75f){
-		float phi = 4*pi/4*(gl_TessCoord.y - 0.75);
-		vpos.x = -R + (R + radius*cos(theta))*cos(phi);
-		vpos.y = 0.66*height + (R + radius*cos(theta))*sin(phi);;
-		vpos.z = radius * sin(theta);
+		phi = 4*alfa*(gl_TessCoord.y - 0.75);
+		vpos.x = -R + (R + radius*sin(theta))*cos(phi);
+		vpos.y = 0.75*height + (R + radius*sin(theta))*sin(phi);;
+		vpos.z = radius * cos(theta);
 		vpos.w = 1.0f;
 	}
 	else{
@@ -42,9 +43,16 @@ void main(){
 		vpos.w = 1.0f;
 	}
 	
-	vnorm = vpos;
-	//vnorm.y = 0;
-
+	if (gl_TessCoord.y <= 0.75f){
+		vnorm = vpos;
+		vnorm.y = 0;
+	}
+	else{
+		vnorm.x = sin(theta)*cos(phi);
+		vnorm.y = sin(phi)*sin(theta);
+		vnorm.z = cos(theta);
+	}
+	
 	mat4 m = transformation;
 	//mat4 m = mat4(1.0f);
 	vpos = m*vpos;
