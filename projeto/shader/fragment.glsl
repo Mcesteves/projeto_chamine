@@ -20,6 +20,7 @@ void main(){
 	vec3 lnorm = normalize(f.light);
 	float ndotl = dot(nnorm, lnorm);
 
+	//color  = vec4(lnorm, 1.0f);
 	color = (ma * ka + md * max(0, ndotl));
 	if(ndotl > 0){
 		vec3 refl = normalize(reflect(-lnorm, nnorm));

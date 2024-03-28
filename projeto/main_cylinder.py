@@ -11,17 +11,14 @@ def initialize ():
   glEnable(GL_DEPTH_TEST)
 
   global curve
-  curve = Curve([1.0, -1.0, 1.0,
-     2.0, 0.0, 0.0,
-     4.0, 3.0, 0.0,
-     3.0, 3.0, 0.0,
-     -2.0, 1.0, 1.0])
+  curve = Curve([0.0, 1.0, 0.0,
+     2.0, 1.0, 0.0])
   global camera
-  camera = Camera(1.0, 0.0, 16.0)
+  camera = Camera(1.0, 1.0, 15.0)
   global shader
   shader = Shader()
   shader.attach_vertex_shader("shader/vertex.glsl")
-  shader.attach_tesselation_shader("shader/control.glsl", "shader/evaluation.glsl")
+  shader.attach_tesselation_shader("shader/control.glsl", "shader/evaluation_2.glsl")
   shader.attach_fragment_shader("shader/fragment.glsl")
   shader.link()  
 

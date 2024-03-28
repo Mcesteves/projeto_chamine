@@ -6,6 +6,7 @@ in vec3 pgeom[];
 patch out mat4 transformation;
 patch out float radius;
 patch out float height;
+//patch out float alfa;
 
 void setTranslationMatrix(vec3 t, out mat4 t_matrix){
 	t_matrix = mat4(
