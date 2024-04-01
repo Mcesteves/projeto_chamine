@@ -6,7 +6,7 @@ from camera import *
 from shader import *
 from curve import*
 
-def initialize ():
+def initialize (win):
   glClearColor(0,0,0,1)
   glEnable(GL_DEPTH_TEST)
   #glEnable(GL_CULL_FACE)
@@ -15,10 +15,14 @@ def initialize ():
      0.0, -1.0, 0.0,
      2.0, 2.0, -1.0,
      0.0, 3.0, -1.0,
-     3.0, 4.0, 0.0,
-     1.0, 2.0, 0.0])
+     -3.0, 6.0, 0.0,
+     1.0, 6.0, 0.0,
+     2.0, 2.0, 0.0])
   global camera
-  camera = Camera(7.0, 0.0, 12.0)
+  camera = Camera(0.0, 0.0, 17.0)
+  arcball = camera.create_arcball()
+  arcball.attach(win)
+
   global shader
   shader = Shader()
   shader.attach_vertex_shader("shader/vertex.glsl")
@@ -52,7 +56,7 @@ def main():
     glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
     glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT,GL_TRUE)
 
-    win = glfw.create_window(600, 800, "Cilindro Básico", None, None)
+    win = glfw.create_window(800, 600, "Cilindro Básico", None, None)
 
     if not win:
         glfw.terminate()
@@ -64,7 +68,7 @@ def main():
     
     print("OpenGL version: ",glGetString(GL_VERSION))
 
-    initialize()
+    initialize(win)
 
     # Loop until the user closes the window
     while not glfw.window_should_close(win):

@@ -39,14 +39,14 @@ class Camera ():
   def set_ortho (self, boolean):
     self.ortho = boolean
 
-  # def create_arcball (self):
-  #   from arcball import Arcball
-  #   d = glm.length(self.eye-self.center)
-  #   self.arcball = Arcball(d)
-  #   return self.arcball
+  def create_arcball (self):
+    from arcball import Arcball
+    d = glm.length(self.eye-self.center)
+    self.arcball = Arcball(d)
+    return self.arcball
 
-  # def get_arcball (self):
-  #   return self.arcball
+  def get_arcball (self):
+    return self.arcball
   
   def get_projection_matrix (self):
     viewport = glGetIntegerv(GL_VIEWPORT)

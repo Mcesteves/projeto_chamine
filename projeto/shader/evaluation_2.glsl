@@ -29,7 +29,7 @@ void main(){
 	float phi;
 	float R = 0.8f;
 
-	if (gl_TessCoord.y > 0.75f){
+	if (gl_TessCoord.y >= 0.75f){
 		phi = 4*alfa*(gl_TessCoord.y - 0.75);
 		vpos.x = -R + (R + radius*sin(theta))*cos(phi);
 		vpos.y = 0.75*height + (R + radius*sin(theta))*sin(phi);;
