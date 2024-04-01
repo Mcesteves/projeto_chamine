@@ -31,7 +31,14 @@ class Arcball:
         glfw.set_cursor_pos_callback(win,cursorinit)  # cursor position callback
       else:
         glfw.set_cursor_pos_callback(win,dummy)        # callback disabled
+    def mousewheel(win, xoffset, yoffset):
+      if yoffset > 0:
+        self.__zoom(1.05)
+      elif yoffset < 0:
+        self.__zoom(1.0/1.05)
+
     glfw.set_mouse_button_callback(win,mousebutton)
+    glfw.set_scroll_callback(win, mousewheel)
 
   def init_mouse_motion (self, x0, y0):
     self.x0 = x0
@@ -79,3 +86,10 @@ class Arcball:
       Y /= l
       Z = 0
     return (X,Y,Z)
+  
+  def __zoom(self, scale):
+    m = glm.mat4(1)
+    m = glm.translate(m,glm.vec3(0,0,-self.distance))
+    m = glm.scale(m,glm.vec3(scale, scale, scale))
+    m = glm.translate(m,glm.vec3(0,0,self.distance))
+    self.mat = m * self.mat
