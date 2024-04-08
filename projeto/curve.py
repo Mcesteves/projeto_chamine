@@ -8,10 +8,11 @@ class Curve ():
     self.cylinders = []
     self.points = points
     i = 0
-    while i < len(self.points) - 8:
+    while i < len(self.points) - 11:
       cylinder = Cylinder(np.array([self.points[i], self.points[i+1], self.points[i+2],
          self.points[i+3], self.points[i+4], self.points[i+5],
-         self.points[i+6], self.points[i+7], self.points[i+8]], dtype = 'float32'))
+         self.points[i+6], self.points[i+7], self.points[i+8],
+         self.points[i+9], self.points[i+10], self.points[i+11]], dtype = 'float32'))
       # cylinder = Cylinder(np.array([self.points[i], self.points[i+1], self.points[i+2],
       #    self.points[i+3], self.points[i+4], self.points[i+5]], dtype = 'float32'))
       # print(np.array([self.points[i], self.points[i+1], self.points[i+2],

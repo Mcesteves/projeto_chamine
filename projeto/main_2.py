@@ -1,6 +1,6 @@
 from OpenGL.GL import *
 import glfw
-import numpy as np
+#import numpy as np
 
 from camera import *
 from shader import *
@@ -10,14 +10,13 @@ def initialize (win):
   glClearColor(0,0,0,1)
   glEnable(GL_DEPTH_TEST)
   #glEnable(GL_CULL_FACE)
+
   global curve
   curve = Curve([
      0.0, -1.0, 0.0,
      2.0, 2.0, -1.0,
      0.0, 3.0, -1.0,
-     -3.0, 6.0, 0.0,
-     1.0, 6.0, 0.0,
-     2.0, 2.0, 0.0])
+     -3.0, 6.0, 0.0])
   global camera
   camera = Camera(0.0, 0.0, 17.0)
   arcball = camera.create_arcball()
@@ -46,6 +45,9 @@ def display ():
 
   curve.draw()
 
+def resize(win, width, height):
+   glViewport(0, 0, width, height)
+
 def main():
     # Initialize the library
     if not glfw.init():
@@ -56,7 +58,8 @@ def main():
     glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
     glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT,GL_TRUE)
 
-    win = glfw.create_window(800, 600, "Cilindro Básico", None, None)
+    win = glfw.create_window(800, 600, "Projeto Final", None, None)
+    glfw.set_framebuffer_size_callback(win, resize)
 
     if not win:
         glfw.terminate()

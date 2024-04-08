@@ -1,12 +1,16 @@
 #version 410
-layout (vertices = 3) out;
+layout (vertices = 4) out;
 
 in vec3 pgeom[];
 
-patch out mat4 transformation;
-patch out float radius;
-patch out float height;
-patch out float alfa;
+patch out data{
+	mat4 transformation;
+	float out_radius;
+	float in_radius;
+	float height;
+	float angle;
+	float d1;
+} mesh_data;
 
 void setTranslationMatrix(vec3 t, out mat4 t_matrix){
 	t_matrix = mat4(
@@ -16,6 +20,7 @@ void setTranslationMatrix(vec3 t, out mat4 t_matrix){
 		vec4(t.x, t.y, t.z, 1.0)
 	);
 }
+
 
 void setRotationMatrix(vec3 d, out mat4 r_matrix){
 	d = normalize(d);
@@ -56,17 +61,29 @@ void main(){
 	mat4 translation_matrix;
 	mat4 rotation_matrix;
 
-	vec3 d = pgeom[1] - pgeom[0];
-	vec3 c2 = pgeom[2] - pgeom[1];
-	height = length(d);
+	vec3 v1 = pgeom[1] - pgeom[0];
+	vec3 v2 = pgeom[2] - pgeom[1];
+	vec3 v3 = pgeom[3] - pgeom[2];
 
-	setTranslationMatrix(pgeom[0], translation_matrix);
-	setRotationMatrix(d, rotation_matrix);
+	float beta = CalculateTorusAngle(v1,v2);
+	float theta = CalculateTorusAngle(v2,v3);
 
-	transformation = translation_matrix*rotation_matrix;
-	alfa = CalculateTorusAngle(d,c2);
+	float d1 = 0.25*length(v1);
+	float d2 = 0.25*length(v2);
+	
+	float r1 = d1*(1/tan(beta/2));
+	float r2 = d2*(1/tan(theta/2));
+	
+	setTranslationMatrix(pgeom[1], translation_matrix);
+	setRotationMatrix(v2, rotation_matrix);
 
-	radius = 0.2f;
+	mesh_data.transformation = translation_matrix*rotation_matrix;
+	mesh_data.angle = theta;
+	mesh_data.out_radius = r2;
+	mesh_data.in_radius = 0.2f;
+	mesh_data.height = length(v2);
+	mesh_data.d1 = d1;
+	
 	if (gl_InvocationID == 0)
 	{
 		gl_TessLevelOuter[0] = 64;

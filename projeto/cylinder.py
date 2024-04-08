@@ -4,7 +4,7 @@ class Cylinder ():
   def __init__(self, coords):
     self.coords = coords;
     #glPatchParameteri(GL_PATCH_VERTICES, 2)
-    glPatchParameteri(GL_PATCH_VERTICES, 3)
+    glPatchParameteri(GL_PATCH_VERTICES, 4)
     self.vao = glGenVertexArrays(1)
     glBindVertexArray(self.vao)
     buffer = glGenBuffers(1)
@@ -15,4 +15,4 @@ class Cylinder ():
 
   def draw(self):
     glBindVertexArray(self.vao)
-    glDrawArrays(GL_PATCHES, 0, 3)
+    glDrawArrays(GL_PATCHES, 0, 4)
