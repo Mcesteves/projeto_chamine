@@ -14,10 +14,12 @@ def initialize (win):
   global curve
   curve = Curve([
      0.0, 0.0, 0.0,
+     0.0, 0.0, 0.0,
      2.0, 2.0, 0.0,
      2.0, 5.0, 0.0,
-     5.0, 6.0, 0.0,
+     5.0, 6.0, 2.0,
      3.0, 3.0, 0.0,
+     1.0, 1.0, 0.0,
      1.0, 1.0, 0.0])
   global camera
   camera = Camera(0.0, 0.0, 17.0)
@@ -27,7 +29,7 @@ def initialize (win):
   global shader
   shader = Shader()
   shader.attach_vertex_shader("shader/vertex.glsl")
-  shader.attach_tesselation_shader("shader/control_3.glsl", "shader/evaluation_3.glsl")
+  shader.attach_tesselation_shader("shader/control_4.glsl", "shader/evaluation_3.glsl")
   shader.attach_fragment_shader("shader/fragment.glsl")
   shader.link()  
 

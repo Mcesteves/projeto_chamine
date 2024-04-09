@@ -3,6 +3,8 @@ layout (vertices = 4) out;
 
 in vec3 pgeom[];
 
+#define pi 3.14159265
+
 patch out data{
 	mat4 transformation;
 	float out_radius;
@@ -21,30 +23,14 @@ void setTranslationMatrix(vec3 t, out mat4 t_matrix){
 	);
 }
 
+mat4 createOrthogonalBasis(vec3 d, vec3 y){
+	vec3 z = cross(normalize(d), y);
+	vec3 x = cross(normalize(y), normalize(z));
 
-void setRotationMatrix(vec3 d, out mat4 r_matrix){
-	d = normalize(d);
-	vec3 j = vec3(0,1,0);
-	vec3 r = cross(d, j);
-	
-	if(r == vec3(0,0,0))
-	{
-		r_matrix = mat4(1.0);
-		return;
-	}
-	float theta = acos(dot(j, d));
-
-	float c = cos(theta);
-	float s = sin(theta);
-	float t = 1 - cos(theta);
-	vec3 r_unit = normalize(r);
-
-	r_matrix = mat4(
-		vec4(t * pow(r_unit.x, 2) + c, t * r_unit.x * r_unit.y - s * r_unit.z, t * r_unit.x * r_unit.z + s * r_unit.y, 0.0),
-		vec4(t * r_unit.x * r_unit.y + s * r_unit.z, t * pow(r_unit.y, 2) + c, t * r_unit.y * r_unit.z - s * r_unit.x, 0.0),
-		vec4(t * r_unit.x * r_unit.z - s * r_unit.y, t * r_unit.y * r_unit.z + s * r_unit.x, t * pow(r_unit.z, 2) + c, 0.0),
-		vec4(0.0, 0.0, 0.0, 1.0)
-	);
+	return mat4(vec4(normalize(x),0.0f),
+							vec4(normalize(y), 0.0f),
+							vec4(normalize(z), 0.0f), 
+							vec4(0.0, 0.0, 0.0, 1.0));
 }
 
 float CalculateTorusAngle(vec3 c1, vec3 c2){
@@ -59,11 +45,12 @@ float CalculateTorusAngle(vec3 c1, vec3 c2){
 void main(){
 	
 	mat4 translation_matrix;
-	mat4 rotation_matrix;
 
 	vec3 v1 = pgeom[1] - pgeom[0];
 	vec3 v2 = pgeom[2] - pgeom[1];
 	vec3 v3 = pgeom[3] - pgeom[2];
+
+	mat4 local_to_global = createOrthogonalBasis(v3, v2);
 
 	float beta = CalculateTorusAngle(v1,v2);
 	float theta = CalculateTorusAngle(v2,v3);
@@ -75,9 +62,8 @@ void main(){
 	float r2 = d2*(1/tan(theta/2));
 	
 	setTranslationMatrix(pgeom[1], translation_matrix);
-	setRotationMatrix(v2, rotation_matrix);
 
-	mesh_data.transformation = translation_matrix*rotation_matrix;
+	mesh_data.transformation = translation_matrix*local_to_global;
 	mesh_data.angle = theta;
 	mesh_data.out_radius = r2;
 	mesh_data.in_radius = 0.2f;
