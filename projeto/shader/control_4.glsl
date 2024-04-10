@@ -12,6 +12,7 @@ patch out data{
 	float height;
 	float angle;
 	float d1;
+	float d2;
 } mesh_data;
 
 void setTranslationMatrix(vec3 t, out mat4 t_matrix){
@@ -55,7 +56,7 @@ void main(){
 	float beta = CalculateTorusAngle(v1,v2);
 	float theta = CalculateTorusAngle(v2,v3);
 
-	float d1 = 0.23*length(v1);
+	float d1 = 0.25*length(v1);
 	float d2 = 0.25*length(v2);
 	
 	float r1 = d1*(1/tan(beta/2));
@@ -69,6 +70,7 @@ void main(){
 	mesh_data.in_radius = 0.2f;
 	mesh_data.height = length(v2);
 	mesh_data.d1 = d1;
+	mesh_data.d2 = d2;
 	
 	if (gl_InvocationID == 0)
 	{

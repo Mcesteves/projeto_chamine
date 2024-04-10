@@ -68,7 +68,7 @@ void main(){
 	float beta = CalculateTorusAngle(v1,v2);
 	float theta = CalculateTorusAngle(v2,v3);
 
-	float d1 = 0.23*length(v1);
+	float d1 = 0.25*length(v1);
 	float d2 = 0.25*length(v2);
 	
 	float r1 = d1*(1/tan(beta/2));

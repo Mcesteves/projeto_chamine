@@ -21,6 +21,7 @@ patch in data{
 	float height;
 	float angle;
 	float d1;
+	float d2;
 } mesh_data;
 
 out data {
@@ -37,21 +38,23 @@ void main(){
 	vec4 vnorm;
 	float phi;
 	float R = mesh_data.out_radius;
+	float cylinder_percent = 0.1f;
+	float k = (mesh_data.height - mesh_data.d2 - mesh_data.d1)/cylinder_percent;
 
-	if (gl_TessCoord.y >= 0.75f){
-		phi = 4*mesh_data.angle*(gl_TessCoord.y - 0.75);
+	if (gl_TessCoord.y > cylinder_percent){
+		phi = (1/(1-cylinder_percent))*mesh_data.angle*(gl_TessCoord.y - cylinder_percent);
 		vpos.x = -(-R + (R + mesh_data.in_radius*sin(theta))*cos(phi));
-		vpos.y = 0.75*mesh_data.height + (R + mesh_data.in_radius*sin(theta))*sin(phi);
+		vpos.y = mesh_data.height - mesh_data.d2 + (R + mesh_data.in_radius*sin(theta))*sin(phi);
 		vpos.z = mesh_data.in_radius * cos(theta);
 		vpos.w = 1.0f;
 	}
-	else if(gl_TessCoord.y*mesh_data.height >= mesh_data.d1){
+	else {
 		vpos.x = -mesh_data.in_radius * sin(theta);
-		vpos.y = gl_TessCoord.y * mesh_data.height;
+		vpos.y = gl_TessCoord.y* k + mesh_data.d1;
 		vpos.z = mesh_data.in_radius * cos(theta);
 		vpos.w = 1.0f;
 	}
-	if (gl_TessCoord.y <= 0.75f){
+	if (gl_TessCoord.y <= cylinder_percent){
 		vnorm = vpos;
 		vnorm.y = 0;
 	}
@@ -62,7 +65,6 @@ void main(){
 	}
 	
 	mat4 m = transformation;
-	//mat4 m = mat4(1.0f);
 	vpos = m*vpos;
 	m = transpose(inverse(m));
 	
