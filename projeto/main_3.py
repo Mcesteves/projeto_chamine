@@ -1,6 +1,5 @@
 from OpenGL.GL import *
 import glfw
-#import numpy as np
 
 from camera import *
 from shader import *
@@ -15,12 +14,13 @@ def initialize (win):
   curve = Curve([
      0.0, 0.0, 0.0,
      0.0, 0.0, 0.0,
-     2.0, 2.0, 0.0,
+     5.0, -3.0, -5.0,
+     1.0, 7.0, 9.0,
+     1.0, 1.0, 15.0,
      2.0, 5.0, 0.0,
-     5.0, 6.0, 2.0,
-     3.0, 3.0, 0.0,
-     1.0, 1.0, 0.0,
-     1.0, 1.0, 0.0])
+     2.0, 1.0, 0.0,
+     1.0, -2.0, 0.0,
+     ])
   global camera
   camera = Camera(0.0, 0.0, 17.0)
   arcball = camera.create_arcball()

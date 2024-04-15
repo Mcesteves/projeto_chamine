@@ -53,13 +53,13 @@ void main(){
 
 	mat4 local_to_global = createOrthogonalBasis(v3, v2);
 
-	float beta = CalculateTorusAngle(v1,v2);
+	//float beta = CalculateTorusAngle(v1,v2);
 	float theta = CalculateTorusAngle(v2,v3);
 
-	float d1 = 0.25*length(v1);
-	float d2 = 0.25*length(v2);
+	float d1 = 0.20*length(v1);
+	float d2 = 0.20*length(v2);
 	
-	float r1 = d1*(1/tan(beta/2));
+	//float r1 = d1*(1/tan(beta/2));
 	float r2 = d2*(1/tan(theta/2));
 	
 	setTranslationMatrix(pgeom[1], translation_matrix);
@@ -67,19 +67,19 @@ void main(){
 	mesh_data.transformation = translation_matrix*local_to_global;
 	mesh_data.angle = theta;
 	mesh_data.out_radius = r2;
-	mesh_data.in_radius = 0.2f;
+	mesh_data.in_radius = 0.1f;
 	mesh_data.height = length(v2);
 	mesh_data.d1 = d1;
 	mesh_data.d2 = d2;
 	
 	if (gl_InvocationID == 0)
 	{
-		gl_TessLevelOuter[0] = 64;
-		gl_TessLevelOuter[1] = 64;
-		gl_TessLevelOuter[2] = 64;
-		gl_TessLevelOuter[3] = 64;
-		gl_TessLevelInner[0] = 64;
-		gl_TessLevelInner[1] = 64;
+		gl_TessLevelOuter[0] = 16;
+		gl_TessLevelOuter[1] = 16;
+		gl_TessLevelOuter[2] = 16;
+		gl_TessLevelOuter[3] = 16;
+		gl_TessLevelInner[0] = 16;
+		gl_TessLevelInner[1] = 16;
 	}
 
 }

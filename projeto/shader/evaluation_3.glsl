@@ -9,11 +9,6 @@ uniform mat4 mv;
 uniform mat4 mn;
 uniform mat4 mvp;
 
-patch in mat4 transformation;
-patch in float radius;
-patch in float height;
-patch in float alfa;
-
 patch in data{
 	mat4 transformation;
 	float out_radius;
@@ -64,7 +59,7 @@ void main(){
 		vnorm.z = cos(theta);
 	}
 	
-	mat4 m = transformation;
+	mat4 m = mesh_data.transformation;
 	vpos = m*vpos;
 	m = transpose(inverse(m));
 	
