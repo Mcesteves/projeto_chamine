@@ -28,10 +28,28 @@ mat4 createOrthogonalBasis(vec3 d, vec3 y){
 	vec3 z = cross(normalize(d), y);
 	vec3 x = cross(normalize(y), normalize(z));
 
+	if(z == vec3(0.0f)){
+		if (cross(normalize(d), vec3(1.0f, 0.0f, 0.0f)) == vec3(0.0f)){
+			z = cross(normalize(d), vec3(0.0f, 1.0f, 0.0f));
+			x = cross(normalize(y), normalize(z));
+		}
+		else if (cross(normalize(d), vec3(0.0f, 1.0f, 0.0f)) == vec3(0.0f)){
+			z = cross(normalize(d), vec3(1.0f, 0.0f, 0.0f));
+			x = cross(normalize(y), normalize(z));
+		}
+		else if (cross(normalize(d), vec3(0.0f, 0.0f, 1.0f)) == vec3(0.0f)){
+			z = cross(normalize(d), vec3(1.0f, 0.0f, 0.0f));
+			x = cross(normalize(y), normalize(z));
+		}
+		else{
+			z = cross(normalize(d), vec3(-d.x, d.y, d.z));
+			x = cross(normalize(y), normalize(z));
+		}
+	}
 	return mat4(vec4(normalize(x),0.0f),
-							vec4(normalize(y), 0.0f),
-							vec4(normalize(z), 0.0f), 
-							vec4(0.0, 0.0, 0.0, 1.0));
+				vec4(normalize(y), 0.0f),
+				vec4(normalize(z), 0.0f), 
+				vec4(0.0, 0.0, 0.0, 1.0));
 }
 
 float CalculateTorusAngle(vec3 c1, vec3 c2){
@@ -53,11 +71,18 @@ void main(){
 
 	mat4 local_to_global = createOrthogonalBasis(v3, v2);
 
-	//float beta = CalculateTorusAngle(v1,v2);
+	float beta = CalculateTorusAngle(v1,v2);
 	float theta = CalculateTorusAngle(v2,v3);
 
 	float d1 = 0.20*length(v1);
 	float d2 = 0.20*length(v2);
+	
+	if(beta == 0.0f){
+		d1 = 0.0f;
+	}
+	if(theta == 0.0f){
+		d2 = 0.0f;
+	}
 	
 	//float r1 = d1*(1/tan(beta/2));
 	float r2 = d2*(1/tan(theta/2));
