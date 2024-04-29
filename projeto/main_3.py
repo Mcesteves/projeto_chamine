@@ -13,14 +13,21 @@ def initialize (win):
   global curve
   curve = Curve([
      0.0, 0.0, 0.0,
-     0.0, 0.0, 0.0,
-     5.0, -3.0, -5.0,
-     1.0, 7.0, 9.0,
-     1.0, 1.0, 15.0,
-     2.0, 5.0, 0.0,
-     2.0, 1.0, 0.0,
-     1.0, -2.0, 0.0,
-     ])
+     1.0, 0.0, 0.0,
+     3.0, 3.0, 2.0,
+     5.0, 0.0, 0.0,
+     8.0, 1.0, 0.0,
+     8.0, 2.0, 0.0,
+     -5.0, 8.0, 0.0])
+  
+  global curve1
+  curve1 = Curve([
+     -5.0, 8.0, 0.0,
+     0.0, 4.0, 0.0,
+     1.0, 0.0, 0.0,
+     3.0, 3.0, 2.0,
+     -5.0, 8.0, 0.0])
+  
   global camera
   camera = Camera(0.0, 0.0, 17.0)
   arcball = camera.create_arcball()
@@ -48,6 +55,7 @@ def display ():
   shader.set_uniform("mn",mn)
 
   curve.draw()
+  curve1.draw()
 
 def resize(win, width, height):
    glViewport(0, 0, width, height)

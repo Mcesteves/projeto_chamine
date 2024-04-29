@@ -13,6 +13,7 @@ patch out data{
 	float angle;
 	float d1;
 	float d2;
+	bool no_curve;
 } mesh_data;
 
 void setTranslationMatrix(vec3 t, out mat4 t_matrix){
@@ -64,24 +65,30 @@ float CalculateTorusAngle(vec3 c1, vec3 c2){
 void main(){
 	
 	mat4 translation_matrix;
+	mesh_data.no_curve = false;
 
 	vec3 v1 = pgeom[1] - pgeom[0];
 	vec3 v2 = pgeom[2] - pgeom[1];
 	vec3 v3 = pgeom[3] - pgeom[2];
+
+	if( v3 == vec3(0.0f)){
+		v3 = (normalize(v2));
+	}
 
 	mat4 local_to_global = createOrthogonalBasis(v3, v2);
 
 	float beta = CalculateTorusAngle(v1,v2);
 	float theta = CalculateTorusAngle(v2,v3);
 
-	float d1 = 0.20*length(v1);
-	float d2 = 0.20*length(v2);
+	float d1 = min(0.20*length(v1), 0.20*length(v2));
+	float d2 = min(0.20*length(v2), 0.20*length(v3));
 	
 	if(beta == 0.0f){
 		d1 = 0.0f;
 	}
 	if(theta == 0.0f){
 		d2 = 0.0f;
+		mesh_data.no_curve = true;
 	}
 	
 	//float r1 = d1*(1/tan(beta/2));

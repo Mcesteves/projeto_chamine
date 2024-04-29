@@ -17,6 +17,7 @@ patch in data{
 	float angle;
 	float d1;
 	float d2;
+	bool no_curve;
 } mesh_data;
 
 out data {
@@ -34,9 +35,13 @@ void main(){
 	float phi;
 	float R = mesh_data.out_radius;
 	float cylinder_percent = 0.1f;
-	float k = (mesh_data.height - mesh_data.d2 - mesh_data.d1)/cylinder_percent;
+	float k = mesh_data.height - mesh_data.d2 - mesh_data.d1;
 
-	if (gl_TessCoord.y > cylinder_percent && mesh_data.angle != 0){
+	if(!mesh_data.no_curve){
+		k = k/cylinder_percent;
+	}
+
+	if (gl_TessCoord.y > cylinder_percent && !mesh_data.no_curve){
 		phi = (1/(1-cylinder_percent))*mesh_data.angle*(gl_TessCoord.y - cylinder_percent);
 		vpos.x = -(-R + (R + mesh_data.in_radius*sin(theta))*cos(phi));
 		vpos.y = mesh_data.height - mesh_data.d2 + (R + mesh_data.in_radius*sin(theta))*sin(phi);
@@ -49,7 +54,7 @@ void main(){
 	}
 	else {
 		vpos.x = -mesh_data.in_radius * sin(theta);
-		vpos.y = gl_TessCoord.y* k + mesh_data.d1;
+		vpos.y = gl_TessCoord.y*k + mesh_data.d1;
 		vpos.z = mesh_data.in_radius * cos(theta);
 		vpos.w = 1.0f;
 
@@ -60,10 +65,8 @@ void main(){
 	mat4 m = mesh_data.transformation;
 	vpos = m*vpos;
 	m = transpose(inverse(m));
-	
 	vnorm = m*vnorm;
 	v.veye = vec3(mv*vpos);
-
 
 	if (leye.w == 0)
 		v.light = normalize(vec3(leye));
