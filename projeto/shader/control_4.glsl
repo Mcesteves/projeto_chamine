@@ -80,8 +80,8 @@ void main(){
 	float beta = CalculateTorusAngle(v1,v2);
 	float theta = CalculateTorusAngle(v2,v3);
 
-	float d1 = (0.15*length(v1) + 0.15*length(v2))/2;
-	float d2 = (0.15*length(v2) + 0.15*length(v3))/2;
+	float d1 = min(0.15*length(v1), 0.15*length(v2));
+	float d2 = min(0.15*length(v2), 0.15*length(v3));
 	
 	if(beta == 0.0f){
 		d1 = 0.0f;

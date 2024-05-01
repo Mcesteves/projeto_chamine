@@ -43,19 +43,19 @@ void main(){
 
 	if (gl_TessCoord.y > cylinder_percent && mesh_data.no_curve == 0){
 		phi = (1/(1-cylinder_percent))*mesh_data.angle*(gl_TessCoord.y - cylinder_percent);
-		vpos.x = -(-R + (R + mesh_data.in_radius*sin(theta))*cos(phi));
-		vpos.y = mesh_data.height - mesh_data.d2 + (R + mesh_data.in_radius*sin(theta))*sin(phi);
-		vpos.z = mesh_data.in_radius * cos(theta);
+		vpos.x = -(-R + (R + mesh_data.in_radius*cos(theta))*cos(phi));
+		vpos.y = mesh_data.height - mesh_data.d2 + (R + mesh_data.in_radius*cos(theta))*sin(phi);
+		vpos.z = mesh_data.in_radius * sin(theta);
 		vpos.w = 1.0f;
 
-		vnorm.x = -sin(theta)*cos(phi);
-		vnorm.y = sin(phi)*sin(theta);
-		vnorm.z = cos(theta);
+		vnorm.x = -cos(theta)*cos(phi);
+		vnorm.y = sin(phi)*cos(theta);
+		vnorm.z = sin(theta);
 	}
 	else {
-		vpos.x = -mesh_data.in_radius * sin(theta);
+		vpos.x = -mesh_data.in_radius * cos(theta);
 		vpos.y = gl_TessCoord.y*k + mesh_data.d1;
-		vpos.z = mesh_data.in_radius * cos(theta);
+		vpos.z = mesh_data.in_radius * sin(theta);
 		vpos.w = 1.0f;
 
 		vnorm = vpos;
