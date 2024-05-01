@@ -9,7 +9,6 @@ class Curve ():
     self.__add_begin_end__(points)
     self.cylinders = []
     self.points = points
-    print(self.points)
     i = 0
     while i < len(self.points) - 11:
       cylinder = Cylinder(np.array([self.points[i], self.points[i+1], self.points[i+2],

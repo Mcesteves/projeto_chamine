@@ -17,7 +17,7 @@ patch in data{
 	float angle;
 	float d1;
 	float d2;
-	bool no_curve;
+	int no_curve;
 } mesh_data;
 
 out data {
@@ -37,11 +37,11 @@ void main(){
 	float cylinder_percent = 0.1f;
 	float k = mesh_data.height - mesh_data.d2 - mesh_data.d1;
 
-	if(!mesh_data.no_curve){
+	if(mesh_data.no_curve == 0){
 		k = k/cylinder_percent;
 	}
 
-	if (gl_TessCoord.y > cylinder_percent && !mesh_data.no_curve){
+	if (gl_TessCoord.y > cylinder_percent && mesh_data.no_curve == 0){
 		phi = (1/(1-cylinder_percent))*mesh_data.angle*(gl_TessCoord.y - cylinder_percent);
 		vpos.x = -(-R + (R + mesh_data.in_radius*sin(theta))*cos(phi));
 		vpos.y = mesh_data.height - mesh_data.d2 + (R + mesh_data.in_radius*sin(theta))*sin(phi);

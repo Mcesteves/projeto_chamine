@@ -13,7 +13,7 @@ patch out data{
 	float angle;
 	float d1;
 	float d2;
-	bool no_curve;
+	int no_curve;
 } mesh_data;
 
 void setTranslationMatrix(vec3 t, out mat4 t_matrix){
@@ -65,7 +65,7 @@ float CalculateTorusAngle(vec3 c1, vec3 c2){
 void main(){
 	
 	mat4 translation_matrix;
-	mesh_data.no_curve = false;
+	mesh_data.no_curve = 0;
 
 	vec3 v1 = pgeom[1] - pgeom[0];
 	vec3 v2 = pgeom[2] - pgeom[1];
@@ -80,15 +80,15 @@ void main(){
 	float beta = CalculateTorusAngle(v1,v2);
 	float theta = CalculateTorusAngle(v2,v3);
 
-	float d1 = min(0.20*length(v1), 0.20*length(v2));
-	float d2 = min(0.20*length(v2), 0.20*length(v3));
+	float d1 = (0.15*length(v1) + 0.15*length(v2))/2;
+	float d2 = (0.15*length(v2) + 0.15*length(v3))/2;
 	
 	if(beta == 0.0f){
 		d1 = 0.0f;
 	}
 	if(theta == 0.0f){
 		d2 = 0.0f;
-		mesh_data.no_curve = true;
+		mesh_data.no_curve = 1;
 	}
 	
 	//float r1 = d1*(1/tan(beta/2));
@@ -99,7 +99,7 @@ void main(){
 	mesh_data.transformation = translation_matrix*local_to_global;
 	mesh_data.angle = theta;
 	mesh_data.out_radius = r2;
-	mesh_data.in_radius = 0.1f;
+	mesh_data.in_radius = 0.05f;
 	mesh_data.height = length(v2);
 	mesh_data.d1 = d1;
 	mesh_data.d2 = d2;
