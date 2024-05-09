@@ -2,8 +2,7 @@ from OpenGL.GL import *
 
 class Cylinder ():
   def __init__(self, coords):
-    self.coords = coords;
-    #glPatchParameteri(GL_PATCH_VERTICES, 2)
+    self.coords = coords
     glPatchParameteri(GL_PATCH_VERTICES, 4)
     self.vao = glGenVertexArrays(1)
     glBindVertexArray(self.vao)
