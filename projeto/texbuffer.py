@@ -18,13 +18,9 @@ class TexBuffer():
     def get_tex_id (self):
         return self.tex
 
-# métodos vindos do exemplo. Entender e adaptar
-#  
-    # def load (self, st):
-    #     shd = st.GetShader()
-    #     shd.ActiveTexture(self.varname)
-    #     glBindTexture(GL_TEXTURE_BUFFER,self.tex)
+    def load (self, shader):
+        shader.active_texture(self.varname)
+        glBindTexture(GL_TEXTURE_BUFFER,self.tex)
 
-    # def unload (self, st):
-    #     shd = st.GetShader()
-    #     shd.DeactiveTexture()
+    def unload (self, shader):
+        shader.deactive_texture()
