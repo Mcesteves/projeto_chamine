@@ -42,17 +42,12 @@ class NewCurve ():
           id += 1
         
     #preenchimento das matrizes usando os indices
-
-    i = 0
     id = 0
     while id <= len(self.indices) - 4:
 
       p0 = glm.vec3(self.__get_point_from_idx__(self.indices[id + 1]))
       p1 = glm.vec3(self.__get_point_from_idx__(self.indices[id + 2]))
       p2 = glm.vec3(self.__get_point_from_idx__(self.indices[id + 3]))
-      print(p0)
-      print(p1)
-      print(p2) 
       self.matrices.append(self.__set_transformation__(p0, p1, p2, id//4))
       id += 4
 
@@ -91,11 +86,8 @@ class NewCurve ():
     return l
 
   #calcula matriz de translacao
-  def __set_translation_matrix__(self, v0, v1, id):
+  def __set_translation_matrix__(self, v0):
     t = v0
-    # if id != 0:
-    #   t = v1 - v0
-
     #return glm.mat4x4(1.0)
     return glm.mat4x4(
         glm.vec4(1.0, 0.0, 0.0, 0.0),
@@ -127,7 +119,7 @@ class NewCurve ():
   #calcula matriz de transformacao que sera usada no shader
   def __set_transformation__(self, v0, v1, v2, id):
     if id == 0:
-      translation = self.__set_translation_matrix__(v0, v1, id)
+      translation = self.__set_translation_matrix__(v0)
       rotation = self.__set_rotation_matrix__(v0, v1, v2)
       matrix = translation#*rotation
 
@@ -137,7 +129,7 @@ class NewCurve ():
       new_v0 = glm.vec3(self.matrices[id-1] * glm.vec4(v0, 0))
       new_v1 = glm.vec3(self.matrices[id-1] * glm.vec4(v1, 0))
       new_v2 = glm.vec3(self.matrices[id-1] * glm.vec4(v2, 0))
-      translation = self.__set_translation_matrix__(new_v0, new_v1, id)
+      translation = self.__set_translation_matrix__(new_v0)
       rotation = self.__set_rotation_matrix__(new_v0, new_v1, new_v2)
 
       matrix = translation #*rotation* self.matrices[id-1]
