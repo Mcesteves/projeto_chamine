@@ -43,16 +43,24 @@ class NewCurve ():
         
     #preenchimento das matrizes usando os indices
 
-      # v0 = glm.vec3(self.points[i+3], self.points[i+4], self.points[i+5])
-      # v1 = glm.vec3(self.points[i+6], self.points[i+7], self.points[i+8])
-      # v2 = glm.vec3(self.points[i+9], self.points[i+10], self.points[i+11])
-      # self.matrices.append(self.__set_transformation__(v0, v1, v2, id))
+    i = 0
+    id = 0
+    while id <= len(self.indices) - 4:
+
+      p0 = glm.vec3(self.__get_point_from_idx__(self.indices[id + 1]))
+      p1 = glm.vec3(self.__get_point_from_idx__(self.indices[id + 2]))
+      p2 = glm.vec3(self.__get_point_from_idx__(self.indices[id + 3]))
+      print(p0)
+      print(p1)
+      print(p2) 
+      self.matrices.append(self.__set_transformation__(p0, p1, p2, id//4))
+      id += 4
 
     self.points = np.array(self.points, dtype= "float32")
     self.indices = np.array(self.indices, dtype= "uint32")
-    #self.texbuffer = TexBuffer("transform_buffer", np.array(self.lines, dtype= "float32"))
-    print(self.points)
-    print(self.indices)
+    self.texbuffer = TexBuffer("transform_buffer", np.array(self.lines, dtype= "float32"))
+    #print(self.points)
+    #print(self.indices)
 
     glPatchParameteri(GL_PATCH_VERTICES, 4)
     self.vao = glGenVertexArrays(1)
@@ -84,19 +92,20 @@ class NewCurve ():
 
   #calcula matriz de translacao
   def __set_translation_matrix__(self, v0, v1, id):
-    t = v1
-    if id != 0:
-      t = v1 - v0
+    t = v0
+    # if id != 0:
+    #   t = v1 - v0
 
-    return glm.mat4x4(1.0)
-    # return glm.mat4x4(
-    #     glm.vec4(1.0, 0.0, 0.0, 0.0),
-		#     glm.vec4(0.0, 1.0, 0.0, 0.0),
-		#     glm.vec4(0.0, 0.0, 1.0, 0.0),
-		#     glm.vec4(t.x, t.y, t.z, 1.0)
-    #   )
+    #return glm.mat4x4(1.0)
+    return glm.mat4x4(
+        glm.vec4(1.0, 0.0, 0.0, 0.0),
+		    glm.vec4(0.0, 1.0, 0.0, 0.0),
+		    glm.vec4(0.0, 0.0, 1.0, 0.0),
+		    glm.vec4(t.x, t.y, t.z, 1.0)
+      )
 
   #calcula matriz de rotacao
+  #ainda não está funcionando
   def __set_rotation_matrix__(self, v0, v1, v2):
 
       y = v1 - v0
@@ -120,24 +129,9 @@ class NewCurve ():
     if id == 0:
       translation = self.__set_translation_matrix__(v0, v1, id)
       rotation = self.__set_rotation_matrix__(v0, v1, v2)
-      #matrix = translation*rotation
-      matrix = glm.mat4x4(1.0)
+      matrix = translation#*rotation
 
-
-      self.lines.append(matrix[0].x)
-      self.lines.append(matrix[1].x)
-      self.lines.append(matrix[2].x)
-      self.lines.append(matrix[3].x)
-      self.lines.append(matrix[0].y)
-      self.lines.append(matrix[1].y)
-      self.lines.append(matrix[2].y)
-      self.lines.append(matrix[3].y)
-      self.lines.append(matrix[0].z)
-      self.lines.append(matrix[1].z)
-      self.lines.append(matrix[2].z)
-      self.lines.append(matrix[3].z)
-      print(self.lines)
-
+      self.__mat_to_buffer__(matrix)
       return matrix
     else:
       new_v0 = glm.vec3(self.matrices[id-1] * glm.vec4(v0, 0))
@@ -146,24 +140,10 @@ class NewCurve ():
       translation = self.__set_translation_matrix__(new_v0, new_v1, id)
       rotation = self.__set_rotation_matrix__(new_v0, new_v1, new_v2)
 
-      #matrix = translation *rotation* self.matrices[id-1]
+      matrix = translation #*rotation* self.matrices[id-1]
 
-      matrix = glm.mat4x4(1.0)
-
-      self.lines.append(matrix[0].x)
-      self.lines.append(matrix[1].x)
-      self.lines.append(matrix[2].x)
-      self.lines.append(matrix[3].x)
-      self.lines.append(matrix[0].y)
-      self.lines.append(matrix[1].y)
-      self.lines.append(matrix[2].y)
-      self.lines.append(matrix[3].y)
-      self.lines.append(matrix[0].z)
-      self.lines.append(matrix[1].z)
-      self.lines.append(matrix[2].z)
-      self.lines.append(matrix[3].z)
-      
-      print(self.lines)
+      #matrix = glm.mat4x4(1.0) * translation
+      self.__mat_to_buffer__(matrix)
 
       return matrix
 
@@ -173,3 +153,20 @@ class NewCurve ():
 
   def set_transformation_buffer(self, shader):
     self.texbuffer.load(shader)
+
+  def __get_point_from_idx__(self, idx):
+    return (self.points[3*idx], self.points[3*idx + 1], self.points[3*idx + 2])
+  
+  def __mat_to_buffer__(self, matrix):
+    self.lines.append(matrix[0].x)
+    self.lines.append(matrix[1].x)
+    self.lines.append(matrix[2].x)
+    self.lines.append(matrix[3].x)
+    self.lines.append(matrix[0].y)
+    self.lines.append(matrix[1].y)
+    self.lines.append(matrix[2].y)
+    self.lines.append(matrix[3].y)
+    self.lines.append(matrix[0].z)
+    self.lines.append(matrix[1].z)
+    self.lines.append(matrix[2].z)
+    self.lines.append(matrix[3].z)

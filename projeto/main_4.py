@@ -9,13 +9,13 @@ from curve import*
 def initialize (win):
   glClearColor(0,0,0,1)
   glEnable(GL_DEPTH_TEST)
-  glEnable(GL_CULL_FACE)
+  #glEnable(GL_CULL_FACE)
   #glCullFace(GL_FRONT); 
 
   global curve
   curve = NewCurve([
      0.0, 0.0, 0.0,
-     1.0, 0.0, 0.0,
+     1.0, 3.0, 0.0,
      2.0, 0.0, 0.0,
      2.0, 1.0, 2.0,
      ])
@@ -35,7 +35,7 @@ def initialize (win):
   global shader
   shader = Shader()
   shader.attach_vertex_shader("shader/vertex.glsl")
-  shader.attach_tesselation_shader("shader/control_4.glsl", "shader/evaluation_3.glsl")
+  shader.attach_tesselation_shader("shader/control_5.glsl", "shader/evaluation_3.glsl")
   shader.attach_fragment_shader("shader/fragment.glsl")
   shader.link()  
   
@@ -54,7 +54,7 @@ def display ():
   shader.set_uniform("mvp",mvp)
   shader.set_uniform("mv",mv)
   shader.set_uniform("mn",mn)
-  #curve.set_transformation_buffer(shader)
+  curve.set_transformation_buffer(shader)
 
   curve.draw()
   #curve1.draw()

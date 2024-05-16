@@ -57,7 +57,7 @@ void main(){
 
 	vec4 line1 = texelFetch(transform_buffer, gl_PrimitiveID*3);
 	vec4 line2 = texelFetch(transform_buffer, gl_PrimitiveID*3 + 1);
-	vec4 line3 = texelFetch(transform_buffer, gl_PrimitiveID*3 + 1);
+	vec4 line3 = texelFetch(transform_buffer, gl_PrimitiveID*3 + 2);
 	mat4 transform = mat4(
 		vec4(line1.x, line2.x, line3.x, 0.0f),
 		vec4(line1.y, line2.y, line3.y, 0.0f),
