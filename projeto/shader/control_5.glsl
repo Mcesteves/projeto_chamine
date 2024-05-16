@@ -7,6 +7,7 @@ in vec3 pgeom[];
 uniform samplerBuffer transform_buffer;
 
 patch out data{
+	mat4 transformation;
 	float out_radius;
 	float in_radius;
 	float height;
@@ -54,16 +55,17 @@ void main(){
 	//float r1 = d1*(1/tan(beta/2));
 	float r2 = d2*(1/tan(theta/2));
 
-	vec4 line1 = texelFetch(transform_buffer, id, ).xyzw
-	vec4 line2 = texelFetch(transform_buffer, id+ 1, ).xyzw
-	vec4 line3 = texelFetch(transform_buffer, id + 2).xyzw
+	vec4 line1 = texelFetch(transform_buffer, gl_PrimitiveID*3);
+	vec4 line2 = texelFetch(transform_buffer, gl_PrimitiveID*3 + 1);
+	vec4 line3 = texelFetch(transform_buffer, gl_PrimitiveID*3 + 1);
 	mat4 transform = mat4(
-		vec4(),
-		vec4(),
-		vec4(),
-		vec4(),
-	)
+		vec4(line1.x, line2.x, line3.x, 0.0f),
+		vec4(line1.y, line2.y, line3.y, 0.0f),
+		vec4(line1.z, line2.z, line3.z, 0.0f),
+		vec4(line1.w, line2.w, line3.w, 1.0f)
+		);
 
+	mesh_data.transformation = transform;
 	mesh_data.angle = theta;
 	mesh_data.out_radius = r2;
 	mesh_data.in_radius = 0.05f;

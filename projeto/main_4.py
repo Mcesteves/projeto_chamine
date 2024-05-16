@@ -16,24 +16,10 @@ def initialize (win):
   curve = NewCurve([
      0.0, 0.0, 0.0,
      1.0, 0.0, 0.0,
-     3.0, 3.0, 2.0,
-     5.0, 0.0, 0.0,
-     8.0, 1.0, 3.0,
-     8.0, 4.0, 0.0,
-     -5.0, 8.0, 0.0,
-     -10.0, 8.0, -5.0,
-     2.0, 4.0, 0.0,
-     6.0, -10.0, 2.0,
-     0.0, 0.0, 0.0,
-     -8.0, 1.0, 3.0,
-     -5.0, 0.0, 0.0,
-     -10, -6.0, 5.0,
-     5.0, -3.0, -5.0,
-     1.0, 7.0, 9.0,
-     1.0, 1.0, 15.0,
-     2.0, 5.0, 0.0,
-     2.0, 1.0, 0.0,
-     1.0, -2.0, 0.0,])
+     2.0, 0.0, 0.0,
+     2.0, 1.0, 2.0,
+     ])
+  
   
 #   global curve1
 #   curve1 = Curve([
@@ -52,10 +38,12 @@ def initialize (win):
   shader.attach_tesselation_shader("shader/control_4.glsl", "shader/evaluation_3.glsl")
   shader.attach_fragment_shader("shader/fragment.glsl")
   shader.link()  
+  
 
 def display ():
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
   shader.use_program()
+  
   global stack
   stack = [glm.mat4(1.0)]  
   mv = stack[-1]
@@ -66,6 +54,7 @@ def display ():
   shader.set_uniform("mvp",mvp)
   shader.set_uniform("mv",mv)
   shader.set_uniform("mn",mn)
+  #curve.set_transformation_buffer(shader)
 
   curve.draw()
   #curve1.draw()

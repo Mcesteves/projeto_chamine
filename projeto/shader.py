@@ -44,9 +44,9 @@ class Shader:
     glUseProgram(self.pid)
 
   def active_texture (self, varname):
-    self.SetUniform(varname,self.texunit)
+    self.set_uniform(varname,self.texunit)
     glActiveTexture(GL_TEXTURE0+self.texunit)
-    self.texunit += 1
+    #self.texunit += 1
 
   def deactive_texture (self):
     self.texunit -= 1

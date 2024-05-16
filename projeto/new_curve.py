@@ -3,7 +3,7 @@ from OpenGL.GL import *
 import numpy as np
 import glm
 
-from cylinder import *
+from texbuffer import *
 
 class NewCurve ():
   def __init__(self, points):
@@ -11,27 +11,49 @@ class NewCurve ():
     self.indices = []
     #tratamento dos pontos
     points = self.__remove_repeated_sequence__(points)
-    self.__add_begin_end__(points)
     self.points = points
-    self.restart_primitive_code = 40000
+    self.lines = []
 
-    i = 0
     id = 0
-    while i < len(self.points) - 11:
-      v0 = glm.vec3(self.points[i+3], self.points[i+4], self.points[i+5])
-      v1 = glm.vec3(self.points[i+6], self.points[i+7], self.points[i+8])
-      v2 = glm.vec3(self.points[i+9], self.points[i+10], self.points[i+11])
-      self.matrices.append(self.__set_transformation__(v0, v1, v2, id))
-      self.indices.append(id)
-      self.indices.append(id+1)
-      self.indices.append(id+2)
-      self.indices.append(id+3)
-      self.indices.append(self.restart_primitive_code)
-      i = i + 3
-      id += 1
+    if len(self.points) == 6:
+      self.indices.append(0)
+      self.indices.append(0)
+      self.indices.append(1)
+      self.indices.append(1)
+    else:
+      while id < len(self.points)/3 - 2:
+        if id == 0:
+          self.indices.append(id)
+          self.indices.append(id)
+          self.indices.append(id+1)
+          self.indices.append(id+2)
 
-    self.points = np.array(self.points)
-    self.indices = np.array(self.indices)
+        if id == len(self.points)/3 - 3:
+          self.indices.append(id)
+          self.indices.append(id+1)
+          self.indices.append(id+2)
+          self.indices.append(id+2)
+          id +=1
+        else:
+          self.indices.append(id)
+          self.indices.append(id+1)
+          self.indices.append(id+2)
+          self.indices.append(id+3)
+          id += 1
+        
+    #preenchimento das matrizes usando os indices
+
+      # v0 = glm.vec3(self.points[i+3], self.points[i+4], self.points[i+5])
+      # v1 = glm.vec3(self.points[i+6], self.points[i+7], self.points[i+8])
+      # v2 = glm.vec3(self.points[i+9], self.points[i+10], self.points[i+11])
+      # self.matrices.append(self.__set_transformation__(v0, v1, v2, id))
+
+    self.points = np.array(self.points, dtype= "float32")
+    self.indices = np.array(self.indices, dtype= "uint32")
+    #self.texbuffer = TexBuffer("transform_buffer", np.array(self.lines, dtype= "float32"))
+    print(self.points)
+    print(self.indices)
+
     glPatchParameteri(GL_PATCH_VERTICES, 4)
     self.vao = glGenVertexArrays(1)
     glBindVertexArray(self.vao)
@@ -40,8 +62,9 @@ class NewCurve ():
     glBufferData(GL_ARRAY_BUFFER, self.points.nbytes, self.points, GL_STATIC_DRAW)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
     glEnableVertexAttribArray(0)
+
     self.ebo = glGenBuffers(1)
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,self.ebo)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.indices.nbytes, self.indices, GL_STATIC_DRAW)
 
   #Remove pontos adjacentes iguais
@@ -58,15 +81,6 @@ class NewCurve ():
     l.append(points[i+1])
     l.append(points[i+2])
     return l
-  
-  #Repete os pontos de inicio e fim na sequencia
-  def __add_begin_end__(self, points):
-    points.insert(0, points[0])
-    points.insert(1, points[2])
-    points.insert(2, points[4])
-    points.append(points[len(points) - 3])
-    points.append(points[len(points) - 3])
-    points.append(points[len(points) - 3])
 
   #calcula matriz de translacao
   def __set_translation_matrix__(self, v0, v1, id):
@@ -74,12 +88,13 @@ class NewCurve ():
     if id != 0:
       t = v1 - v0
 
-    return glm.mat4x4(
-        glm.vec4(1.0, 0.0, 0.0, 0.0),
-		glm.vec4(0.0, 1.0, 0.0, 0.0),
-		glm.vec4(0.0, 0.0, 1.0, 0.0),
-		glm.vec4(t.x, t.y, t.z, 1.0)
-      )
+    return glm.mat4x4(1.0)
+    # return glm.mat4x4(
+    #     glm.vec4(1.0, 0.0, 0.0, 0.0),
+		#     glm.vec4(0.0, 1.0, 0.0, 0.0),
+		#     glm.vec4(0.0, 0.0, 1.0, 0.0),
+		#     glm.vec4(t.x, t.y, t.z, 1.0)
+    #   )
 
   #calcula matriz de rotacao
   def __set_rotation_matrix__(self, v0, v1, v2):
@@ -105,7 +120,25 @@ class NewCurve ():
     if id == 0:
       translation = self.__set_translation_matrix__(v0, v1, id)
       rotation = self.__set_rotation_matrix__(v0, v1, v2)
-      return translation * rotation
+      #matrix = translation*rotation
+      matrix = glm.mat4x4(1.0)
+
+
+      self.lines.append(matrix[0].x)
+      self.lines.append(matrix[1].x)
+      self.lines.append(matrix[2].x)
+      self.lines.append(matrix[3].x)
+      self.lines.append(matrix[0].y)
+      self.lines.append(matrix[1].y)
+      self.lines.append(matrix[2].y)
+      self.lines.append(matrix[3].y)
+      self.lines.append(matrix[0].z)
+      self.lines.append(matrix[1].z)
+      self.lines.append(matrix[2].z)
+      self.lines.append(matrix[3].z)
+      print(self.lines)
+
+      return matrix
     else:
       new_v0 = glm.vec3(self.matrices[id-1] * glm.vec4(v0, 0))
       new_v1 = glm.vec3(self.matrices[id-1] * glm.vec4(v1, 0))
@@ -113,11 +146,30 @@ class NewCurve ():
       translation = self.__set_translation_matrix__(new_v0, new_v1, id)
       rotation = self.__set_rotation_matrix__(new_v0, new_v1, new_v2)
 
-      return translation * rotation * self.matrices[id-1]
+      #matrix = translation *rotation* self.matrices[id-1]
+
+      matrix = glm.mat4x4(1.0)
+
+      self.lines.append(matrix[0].x)
+      self.lines.append(matrix[1].x)
+      self.lines.append(matrix[2].x)
+      self.lines.append(matrix[3].x)
+      self.lines.append(matrix[0].y)
+      self.lines.append(matrix[1].y)
+      self.lines.append(matrix[2].y)
+      self.lines.append(matrix[3].y)
+      self.lines.append(matrix[0].z)
+      self.lines.append(matrix[1].z)
+      self.lines.append(matrix[2].z)
+      self.lines.append(matrix[3].z)
+      
+      print(self.lines)
+
+      return matrix
 
   def draw(self):
     glBindVertexArray(self.vao)
-    glEnable(GL_PRIMITIVE_RESTART)
-    glPrimitiveRestartIndex(self.restart_primitive_code)
-    glDrawElements(GL_PATCHES, self.indices.nbytes, GL_UNSIGNED_INT, 0)
-    glDisable(GL_PRIMITIVE_RESTART)
+    glDrawElements(GL_PATCHES, self.indices.size, GL_UNSIGNED_INT, None)
+
+  def set_transformation_buffer(self, shader):
+    self.texbuffer.load(shader)
