@@ -7,55 +7,17 @@ from texbuffer import *
 
 class NewCurve ():
   def __init__(self, points):
-    self.matrices = []
     self.indices = []
-    #tratamento dos pontos
-    points = self.__remove_repeated_sequence__(points)
-    self.points = points
+    self.points = []
     self.lines = []
-
-    id = 0
-    if len(self.points) == 6:
-      self.indices.append(0)
-      self.indices.append(0)
-      self.indices.append(1)
-      self.indices.append(1)
-    else:
-      while id < len(self.points)/3 - 2:
-        if id == 0:
-          self.indices.append(id)
-          self.indices.append(id)
-          self.indices.append(id+1)
-          self.indices.append(id+2)
-
-        if id == len(self.points)/3 - 3:
-          self.indices.append(id)
-          self.indices.append(id+1)
-          self.indices.append(id+2)
-          self.indices.append(id+2)
-          id +=1
-        else:
-          self.indices.append(id)
-          self.indices.append(id+1)
-          self.indices.append(id+2)
-          self.indices.append(id+3)
-          id += 1
-        
-    #preenchimento das matrizes usando os indices
-    id = 0
-    while id <= len(self.indices) - 4:
-
-      p0 = glm.vec3(self.__get_point_from_idx__(self.indices[id + 1]))
-      p1 = glm.vec3(self.__get_point_from_idx__(self.indices[id + 2]))
-      p2 = glm.vec3(self.__get_point_from_idx__(self.indices[id + 3]))
-      self.matrices.append(self.__set_transformation__(p0, p1, p2, id//4))
-      id += 4
+    #tratamento dos pontos
+    self.points = self.__remove_repeated_sequence__(points)
+    self.__create_indices__()
+    self.__calculate_transformation_matrices__()       
 
     self.points = np.array(self.points, dtype= "float32")
     self.indices = np.array(self.indices, dtype= "uint32")
     self.texbuffer = TexBuffer("transform_buffer", np.array(self.lines, dtype= "float32"))
-    #print(self.points)
-    #print(self.indices)
 
     glPatchParameteri(GL_PATCH_VERTICES, 4)
     self.vao = glGenVertexArrays(1)
@@ -97,31 +59,31 @@ class NewCurve ():
       )
 
   #calcula matriz de rotacao
-  #ainda não está funcionando
   def __set_rotation_matrix__(self, v0, v1, v2):
 
-      y = v1 - v0
-      x = v2 - v1
+    y = v1 - v0
+    x = v2 - v1
 
-      z = glm.cross(glm.normalize(x), glm.normalize(y))
-      if glm.equal(glm.vec3(0.0), z):
-        z = glm.cross(glm.normalize(x), glm.normalize(glm.vec3(-x.y, x.x, 0)))
+    z = glm.cross(glm.normalize(x), y)
+
+    if math.isnan(z.x) or x == glm.vec3(0):
+      z = glm.cross(glm.normalize(y), glm.vec3(-y.y, y.x, 0))
       
-      x = glm.cross(glm.normalize(y), z)
+    x = glm.cross(glm.normalize(y), z)
 
-      return glm.mat4x4(
-        glm.vec4(glm.normalize(x), 0.0),
-        glm.vec4(glm.normalize(y), 0.0),
-        glm.vec4(glm.normalize(z), 0.0),
-        glm.vec4(0.0, 0.0, 0.0, 1.0)
-      )
+    return glm.mat4x4(
+      glm.vec4(glm.normalize(x), 0.0),
+      glm.vec4(glm.normalize(y), 0.0),
+      glm.vec4(glm.normalize(z), 0.0),
+      glm.vec4(0.0, 0.0, 0.0, 1.0)
+    )
   
   #calcula matriz de transformacao que sera usada no shader
-  def __set_transformation__(self, v0, v1, v2, id):
+  def __set_transformation__(self,v0, v1, v2, id):
     if id == 0:
       translation = self.__set_translation_matrix__(v0)
       rotation = self.__set_rotation_matrix__(v0, v1, v2)
-      matrix = translation#*rotation
+      matrix = translation*rotation
 
       self.__mat_to_buffer__(matrix)
       return matrix
@@ -132,9 +94,8 @@ class NewCurve ():
       translation = self.__set_translation_matrix__(new_v0)
       rotation = self.__set_rotation_matrix__(new_v0, new_v1, new_v2)
 
-      matrix = translation #*rotation* self.matrices[id-1]
+      matrix = translation*rotation*self.matrices[id-1]
 
-      #matrix = glm.mat4x4(1.0) * translation
       self.__mat_to_buffer__(matrix)
 
       return matrix
@@ -162,3 +123,41 @@ class NewCurve ():
     self.lines.append(matrix[1].z)
     self.lines.append(matrix[2].z)
     self.lines.append(matrix[3].z)
+
+  def __create_indices__(self):
+    id = 0
+    if len(self.points) == 6:
+      self.indices.append(0)
+      self.indices.append(0)
+      self.indices.append(1)
+      self.indices.append(1)
+    else:
+      while id < len(self.points)/3 - 2:
+        if id == 0:
+          self.indices.append(id)
+          self.indices.append(id)
+          self.indices.append(id+1)
+          self.indices.append(id+2)
+
+        if id == len(self.points)/3 - 3:
+          self.indices.append(id)
+          self.indices.append(id+1)
+          self.indices.append(id+2)
+          self.indices.append(id+2)
+          id +=1
+        else:
+          self.indices.append(id)
+          self.indices.append(id+1)
+          self.indices.append(id+2)
+          self.indices.append(id+3)
+          id += 1
+
+  def __calculate_transformation_matrices__(self):
+    self.matrices = []
+    id = 0
+    while id <= len(self.indices) - 4:
+      p0 = glm.vec3(self.__get_point_from_idx__(self.indices[id + 1]))
+      p1 = glm.vec3(self.__get_point_from_idx__(self.indices[id + 2]))
+      p2 = glm.vec3(self.__get_point_from_idx__(self.indices[id + 3]))
+      self.matrices.append(self.__set_transformation__(p0, p1, p2, id//4))
+      id += 4

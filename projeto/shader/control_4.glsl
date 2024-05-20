@@ -30,22 +30,24 @@ mat4 createOrthogonalBasis(vec3 d, vec3 y){
 	vec3 x = cross(normalize(y), normalize(z));
 
 	if(z == vec3(0.0f)){
-		if (cross(normalize(d), vec3(1.0f, 0.0f, 0.0f)) == vec3(0.0f)){
-			z = cross(normalize(d), vec3(0.0f, 1.0f, 0.0f));
-			x = cross(normalize(y), normalize(z));
-		}
-		else if (cross(normalize(d), vec3(0.0f, 1.0f, 0.0f)) == vec3(0.0f)){
-			z = cross(normalize(d), vec3(1.0f, 0.0f, 0.0f));
-			x = cross(normalize(y), normalize(z));
-		}
-		else if (cross(normalize(d), vec3(0.0f, 0.0f, 1.0f)) == vec3(0.0f)){
-			z = cross(normalize(d), vec3(1.0f, 0.0f, 0.0f));
-			x = cross(normalize(y), normalize(z));
-		}
-		else{
-			z = cross(normalize(d), vec3(-d.x, d.y, d.z));
-			x = cross(normalize(y), normalize(z));
-		}
+		z = cross(normalize(d), vec3(-d.y, d.x, 0.0f));
+		x = cross(normalize(y), normalize(z));
+		//if (cross(normalize(d), vec3(1.0f, 0.0f, 0.0f)) == vec3(0.0f)){
+		//	z = cross(normalize(d), vec3(0.0f, 1.0f, 0.0f));
+		//	x = cross(normalize(y), normalize(z));
+		//}
+		//else if (cross(normalize(d), vec3(0.0f, 1.0f, 0.0f)) == vec3(0.0f)){
+		//	z = cross(normalize(d), vec3(1.0f, 0.0f, 0.0f));
+		//	x = cross(normalize(y), normalize(z));
+		//}
+		//else if (cross(normalize(d), vec3(0.0f, 0.0f, 1.0f)) == vec3(0.0f)){
+		//	z = cross(normalize(d), vec3(1.0f, 0.0f, 0.0f));
+		//	x = cross(normalize(y), normalize(z));
+		//}
+		//else{
+		//	z = cross(normalize(d), vec3(-d.x, d.y, d.z));
+		//	x = cross(normalize(y), normalize(z));
+		//}
 	}
 	return mat4(vec4(normalize(x),0.0f),
 				vec4(normalize(y), 0.0f),
