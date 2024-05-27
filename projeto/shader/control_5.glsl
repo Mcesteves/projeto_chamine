@@ -5,6 +5,7 @@ in vec3 pgeom[];
 
 #define pi 3.14159265
 uniform samplerBuffer transform_buffer;
+uniform samplerBuffer angle_buffer;
 
 patch out data{
 	mat4 transformation;
@@ -15,6 +16,7 @@ patch out data{
 	float d1;
 	float d2;
 	int no_curve;
+	float start_angle;
 } mesh_data;
 
 float CalculateTorusAngle(vec3 c1, vec3 c2){
@@ -65,6 +67,15 @@ void main(){
 		vec4(line1.w, line2.w, line3.w, 1.0f)
 		);
 
+	int i = textureSize(angle_buffer);
+	float start = 0;
+	while(i >= gl_PrimitiveID){
+		float angle = texelFetch(angle_buffer, i).x;
+		start += angle;
+		i -= 1;
+	}
+	
+	mesh_data.start_angle = start;
 	mesh_data.transformation = transform;
 	mesh_data.angle = theta;
 	mesh_data.out_radius = r2;

@@ -18,6 +18,7 @@ patch in data{
 	float d1;
 	float d2;
 	int no_curve;
+	float start_angle;
 } mesh_data;
 
 out data {
@@ -28,7 +29,7 @@ out data {
 
 void main(){
 
-	float theta = 2*pi*gl_TessCoord.x;
+	float theta = 2*pi*gl_TessCoord.x + mesh_data.start_angle;
 	
 	vec4 vpos;
 	vec4 vnorm;
