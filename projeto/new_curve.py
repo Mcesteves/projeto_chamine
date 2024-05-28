@@ -166,8 +166,8 @@ class NewCurve ():
     glDrawElements(GL_PATCHES, self.indices.size, GL_UNSIGNED_INT, None)
 
   def set_transformation_buffer(self, shader):
-    self.mat_textbuffer.load(shader, 1)
+    self.mat_textbuffer.load(shader)
 
   def set_angle_buffer(self, shader):
-    self.angles_textbuffer.load(shader, 2)
+    self.angles_textbuffer.load(shader)
   

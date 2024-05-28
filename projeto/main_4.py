@@ -36,13 +36,6 @@ def initialize (win):
      1.0, -2.0, 0.0,
      ])
   
-  
-#   global curve1
-#   curve1 = Curve([
-#      0.0, 0.0, 0.0,
-#      1.0, 0.0, 0.0,
-#      3.0, 3.0, 2.0])
-  
   global camera
   camera = Camera(0.0, 0.0, 17.0)
   arcball = camera.create_arcball()
@@ -54,13 +47,13 @@ def initialize (win):
   shader.attach_tesselation_shader("shader/control_5.glsl", "shader/evaluation_4.glsl")
   shader.attach_fragment_shader("shader/fragment.glsl")
   shader.link() 
+  shader.use_program()
+  curve.set_transformation_buffer(shader)
+  curve.set_angle_buffer(shader) 
   
-  
-
 def display ():
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
   shader.use_program()
-  
   global stack
   stack = [glm.mat4(1.0)]  
   mv = stack[-1]
@@ -71,8 +64,6 @@ def display ():
   shader.set_uniform("mvp",mvp)
   shader.set_uniform("mv",mv)
   shader.set_uniform("mn",mn)
-  curve.set_transformation_buffer(shader)
-  curve.set_angle_buffer(shader) 
   
   curve.draw()
   #curve1.draw()

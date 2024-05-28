@@ -50,10 +50,8 @@ class Utils:
   #calcula matriz de rotacao
   @staticmethod
   def set_rotation_matrix(v0, v1, v2):
-
     y = v1 - v0
     x = v2 - v1
-
     z = glm.cross(glm.normalize(x), y)
 
     if math.isnan(z.x) or x == glm.vec3(0):
