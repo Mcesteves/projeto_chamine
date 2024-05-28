@@ -3,6 +3,7 @@ import glfw
 
 from camera import *
 from new_curve import NewCurve
+from preferences import *
 from shader import *
 from curve import*
 
@@ -12,6 +13,23 @@ def initialize (win):
   glPolygonMode(GL_FRONT, GL_LINE)
   glEnable(GL_CULL_FACE)
   #glCullFace(GL_FRONT); 
+  
+  global camera
+  camera = Camera(0.0, 0.0, 17.0)
+  arcball = camera.create_arcball()
+  arcball.attach(win)
+
+  global shader
+  shader = Shader()
+  shader.attach_vertex_shader("shader/vertex.glsl")
+  shader.attach_tesselation_shader("shader/control_5.glsl", "shader/evaluation_4.glsl")
+  shader.attach_fragment_shader("shader/fragment.glsl")
+  shader.link() 
+  shader.use_program()
+
+  global preferences
+  preferences = Preferences(shader)
+
   global curve
   curve = NewCurve([
      0.0, 0.0, 0.0,
@@ -30,26 +48,12 @@ def initialize (win):
      -10, -6.0, 5.0,
      5.0, -3.0, -5.0,
      1.0, 7.0, 9.0,
-     1.0, 1.0, 15.0,
+     2.0, 1.0, 15.0,
      2.0, 5.0, 0.0,
-     2.0, 1.0, 0.0,
-     1.0, -2.0, 0.0,
+     2.0, 8.0, 0.0,
+     2.0, -2.0, 0.0,
+     -2.0, -1.0, 0.0,
      ])
-  
-  global camera
-  camera = Camera(0.0, 0.0, 17.0)
-  arcball = camera.create_arcball()
-  arcball.attach(win)
-
-  global shader
-  shader = Shader()
-  shader.attach_vertex_shader("shader/vertex.glsl")
-  shader.attach_tesselation_shader("shader/control_5.glsl", "shader/evaluation_4.glsl")
-  shader.attach_fragment_shader("shader/fragment.glsl")
-  shader.link() 
-  shader.use_program()
-  curve.set_transformation_buffer(shader)
-  curve.set_angle_buffer(shader) 
   
 def display ():
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -66,7 +70,6 @@ def display ():
   shader.set_uniform("mn",mn)
   
   curve.draw()
-  #curve1.draw()
 
 def resize(win, width, height):
    glViewport(0, 0, width, height)

@@ -6,11 +6,11 @@ in vec3 pgeom[];
 #define pi 3.14159265
 uniform samplerBuffer transform_buffer;
 uniform samplerBuffer angle_buffer;
+uniform int subdivision;
 
 patch out data{
 	mat4 transformation;
 	float out_radius;
-	float in_radius;
 	float height;
 	float angle;
 	float d1;
@@ -54,7 +54,6 @@ void main(){
 		mesh_data.no_curve = 1;
 	}
 	
-	//float r1 = d1*(1/tan(beta/2));
 	float r2 = d2*(1/tan(theta/2));
 
 	vec4 line1 = texelFetch(transform_buffer, gl_PrimitiveID*3);
@@ -74,24 +73,22 @@ void main(){
 		start += angle;
 		i -= 1;
 	}
-	
 	mesh_data.start_angle = start;
 	mesh_data.transformation = transform;
 	mesh_data.angle = theta;
 	mesh_data.out_radius = r2;
-	mesh_data.in_radius = 0.05f;
 	mesh_data.height = length(v2);
 	mesh_data.d1 = d1;
 	mesh_data.d2 = d2;
 	
 	if (gl_InvocationID == 0)
 	{
-		gl_TessLevelOuter[0] = 16;
-		gl_TessLevelOuter[1] = 16;
-		gl_TessLevelOuter[2] = 16;
-		gl_TessLevelOuter[3] = 16;
-		gl_TessLevelInner[0] = 16;
-		gl_TessLevelInner[1] = 16;
+		gl_TessLevelOuter[0] = subdivision;
+		gl_TessLevelOuter[1] = subdivision;
+		gl_TessLevelOuter[2] = subdivision;
+		gl_TessLevelOuter[3] = subdivision;
+		gl_TessLevelInner[0] = subdivision;
+		gl_TessLevelInner[1] = subdivision;
 	}
 
 }

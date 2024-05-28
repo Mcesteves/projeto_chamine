@@ -3,6 +3,7 @@ from OpenGL.GL import *
 import numpy as np
 import glm
 
+from preferences import Preferences
 from utils import *
 from texbuffer import *
 
@@ -34,6 +35,9 @@ class NewCurve ():
     self.ebo = glGenBuffers(1)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.indices.nbytes, self.indices, GL_STATIC_DRAW)
+
+    self.__set_transformation_buffer__()
+    self.__set_angle_buffer__()
 
   
   #calcula matriz de transformacao que sera usada no shader
@@ -109,13 +113,14 @@ class NewCurve ():
 
   def __calculate_angle__(self, p0, p1, p2, p3, id):
 
+    preferences = Preferences.get_instance()
     #calculo de dois pontos do toro do ramo atual
     v1 = glm.vec3(p1 - p0)
     v2 = glm.vec3(p2 - p1)
     v3 = glm.vec3(p3 - p2)
 
     theta = 0
-    in_radius = 0.05
+    in_radius = preferences.get_curve_thickness()
 
     d2 = min(0.15*glm.length(v2), 0.15*glm.length(v3))
     height = glm.length(v2)
@@ -165,9 +170,11 @@ class NewCurve ():
     glBindVertexArray(self.vao)
     glDrawElements(GL_PATCHES, self.indices.size, GL_UNSIGNED_INT, None)
 
-  def set_transformation_buffer(self, shader):
-    self.mat_textbuffer.load(shader)
+  def __set_transformation_buffer__(self):
+    sh = Preferences.get_instance().get_shader()
+    self.mat_textbuffer.load(sh)
 
-  def set_angle_buffer(self, shader):
-    self.angles_textbuffer.load(shader)
+  def __set_angle_buffer__(self):
+    sh = Preferences.get_instance().get_shader()
+    self.angles_textbuffer.load(sh)
   

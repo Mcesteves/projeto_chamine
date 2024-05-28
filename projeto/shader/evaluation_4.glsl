@@ -8,11 +8,11 @@ const vec4 leye = vec4(2.0f, 3.0f, 5.0f, 1.0f);
 uniform mat4 mv;
 uniform mat4 mn;
 uniform mat4 mvp;
+uniform float thickness;
 
 patch in data{
 	mat4 transformation;
 	float out_radius;
-	float in_radius;
 	float height;
 	float angle;
 	float d1;
@@ -44,9 +44,9 @@ void main(){
 
 	if (gl_TessCoord.y > cylinder_percent && mesh_data.no_curve == 0){
 		phi = (1/(1-cylinder_percent))*mesh_data.angle*(gl_TessCoord.y - cylinder_percent);
-		vpos.x = -(-R + (R + mesh_data.in_radius*cos(theta))*cos(phi));
-		vpos.y = mesh_data.height - mesh_data.d2 + (R + mesh_data.in_radius*cos(theta))*sin(phi);
-		vpos.z = mesh_data.in_radius * sin(theta);
+		vpos.x = -(-R + (R + thickness*cos(theta))*cos(phi));
+		vpos.y = mesh_data.height - mesh_data.d2 + (R + thickness*cos(theta))*sin(phi);
+		vpos.z = thickness * sin(theta);
 		vpos.w = 1.0f;
 
 		vnorm.x = -cos(theta)*cos(phi);
@@ -54,9 +54,9 @@ void main(){
 		vnorm.z = sin(theta);
 	}
 	else {
-		vpos.x = -mesh_data.in_radius * cos(theta);
+		vpos.x = -thickness * cos(theta);
 		vpos.y = gl_TessCoord.y*k + mesh_data.d1;
-		vpos.z = mesh_data.in_radius * sin(theta);
+		vpos.z = thickness * sin(theta);
 		vpos.w = 1.0f;
 
 		vnorm = vpos;
