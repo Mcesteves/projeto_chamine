@@ -18,7 +18,12 @@ class Utils:
   def calculate_torus_angle(c1, c2):  
       c1 = glm.normalize(c1)
       c2 = glm.normalize(c2)  
-      angle = math.acos(glm.dot(c1, c2))
+      dot = glm.dot(c1, c2)
+      if dot > 1:
+        dot = 1
+      if dot < -1:
+        dot = -1
+      angle = math.acos(dot)
       return angle
   
   #Remove pontos adjacentes iguais
@@ -54,8 +59,12 @@ class Utils:
     x = v2 - v1
     z = glm.cross(glm.normalize(x), y)
 
-    if math.isnan(z.x) or x == glm.vec3(0):
+    if math.isnan(z.x) or z == glm.vec3(0):
       z = glm.cross(glm.normalize(y), glm.vec3(-y.y, y.x, 0))
+      if math.isnan(z.x) or z == glm.vec3(0):
+        z = glm.cross(glm.normalize(y), glm.vec3(-y.z, 0, y.x))
+        if math.isnan(z.x) or z == glm.vec3(0):
+          z = glm.cross(glm.normalize(y), glm.vec3(0, -y.z, y.y))
       
     x = glm.cross(glm.normalize(y), z)
 
