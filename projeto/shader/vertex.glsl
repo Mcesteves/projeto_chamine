@@ -1,7 +1,7 @@
 #version 410
-layout (location = 0) in vec3 geom;
+layout (location = 0) in vec4 geom;
 
-out vec3 pgeom;
+out vec4 pgeom;
 
 void main()
 {

@@ -2,16 +2,15 @@ from OpenGL.GL import *
 import glfw
 
 from camera import *
-from new_curve import NewCurve
+from line import *
 from preferences import *
 from shader import *
-from curve import*
 
 def initialize (win):
   glClearColor(0,0,0,1)
   glEnable(GL_DEPTH_TEST)
   glPolygonMode(GL_FRONT, GL_LINE)
-  glEnable(GL_CULL_FACE)
+  #glEnable(GL_CULL_FACE)
   #glCullFace(GL_FRONT); 
   
   global camera
@@ -31,7 +30,7 @@ def initialize (win):
   preferences = Preferences(shader)
 
   global curve
-  curve = NewCurve([
+  curve = Line([
      0.0, 0.0, 0.0,
      1.0, 0.0, 0.0,
      3.0, 3.0, 2.0,
@@ -55,6 +54,23 @@ def initialize (win):
      -2.0, -1.0, 0.0,
      ])
   
+  global curve1
+  curve1 = Line([
+     0.0, 0.0, 0.0,
+     1.0, 0.0, 0.0,
+     3.0, 3.0, 2.0, 
+     -1.0, 0.0, 0.0,
+     2.0, 1.0, 3.0,
+     2.0, 4.0, 0.0,
+     -9.0, 5.0, 0.0,
+     -14.0, 3.0, -5.0,
+     -5.0, 4.0, 0.0,
+     2.0, -6.0, 2.0
+     ])
+  
+  preferences.set_line_thickness(0.05)
+  preferences.set_subdivision(16)
+
 def display ():
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
   shader.use_program()
@@ -70,6 +86,7 @@ def display ():
   shader.set_uniform("mn",mn)
   
   curve.draw()
+  #curve1.draw()
 
 def resize(win, width, height):
    glViewport(0, 0, width, height)

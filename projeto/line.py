@@ -7,21 +7,22 @@ from preferences import Preferences
 from utils import *
 from texbuffer import *
 
-class NewCurve ():
+class Line ():
   def __init__(self, points):
     self.indices = []
     self.points = []
-    self.lines = []
     self.angles = []
+
     #tratamento dos pontos
     self.points = Utils.remove_repeated_sequence(points)
     self.__create_indices__()
-    self.__calculate_transformation_matrices__()    
-
+    self.__calculate_transformation_matrices__()
+    self.points = Utils.vec3_to_vec4(points)
+    self.__build_points_array__()
+    self.angles.clear()
+    
     self.points = np.array(self.points, dtype= "float32")
     self.indices = np.array(self.indices, dtype= "uint32")
-    self.mat_textbuffer = TexBuffer("transform_buffer", np.array(self.lines, dtype= "float32"), "matrix")
-    self.angles_textbuffer = TexBuffer("angle_buffer", np.array(self.angles, dtype= "float32"), None)
 
     glPatchParameteri(GL_PATCH_VERTICES, 4)
     self.vao = glGenVertexArrays(1)
@@ -29,17 +30,13 @@ class NewCurve ():
     self.vbo = glGenBuffers(1)
     glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
     glBufferData(GL_ARRAY_BUFFER, self.points.nbytes, self.points, GL_STATIC_DRAW)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, None)
     glEnableVertexAttribArray(0)
 
     self.ebo = glGenBuffers(1)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.indices.nbytes, self.indices, GL_STATIC_DRAW)
 
-    self.__set_transformation_buffer__()
-    self.__set_angle_buffer__()
-
-  
   #calcula matriz de transformacao que sera usada no shader
   def __set_transformation__(self, v0, v1, v2):
     translation = Utils.set_translation_matrix(v0)
@@ -47,26 +44,10 @@ class NewCurve ():
 
     matrix = translation*rotation
 
-    self.__mat_to_buffer__(matrix)
-
     return matrix
 
   def __get_point_from_idx__(self, idx):
     return (self.points[3*idx], self.points[3*idx + 1], self.points[3*idx + 2])
-  
-  def __mat_to_buffer__(self, matrix):
-    self.lines.append(matrix[0].x)
-    self.lines.append(matrix[1].x)
-    self.lines.append(matrix[2].x)
-    self.lines.append(matrix[3].x)
-    self.lines.append(matrix[0].y)
-    self.lines.append(matrix[1].y)
-    self.lines.append(matrix[2].y)
-    self.lines.append(matrix[3].y)
-    self.lines.append(matrix[0].z)
-    self.lines.append(matrix[1].z)
-    self.lines.append(matrix[2].z)
-    self.lines.append(matrix[3].z)
 
   def __create_indices__(self):
     id = 0
@@ -101,26 +82,30 @@ class NewCurve ():
       self.matrices.append(self.__set_transformation__(p0, p1, p2))
       i += 1
 
-    id = 0
+    id = len(self.indices)//4 - 2
+    angle_sum = 0
 
-    while id < len(self.indices)/4 - 1:
+    while id >= 0:
       p0 = glm.vec3(self.__get_point_from_idx__(self.indices[id*4]))
       p1 = glm.vec3(self.__get_point_from_idx__(self.indices[id*4 + 1]))
       p2 = glm.vec3(self.__get_point_from_idx__(self.indices[id*4 + 2]))
       p3 = glm.vec3(self.__get_point_from_idx__(self.indices[id*4 + 3]))
-      self.angles.append(self.__calculate_angle__(p0, p1, p2, p3, id))
-      id += 1
+      angle = self.__calculate_angle__(p0, p1, p2, p3, id)
+      angle_sum += angle
+      self.angles.append(angle_sum)
+      id -= 1
+
+    self.matrices.clear()
 
   def __calculate_angle__(self, p0, p1, p2, p3, id):
 
-    preferences = Preferences.get_instance()
     #calculo de dois pontos do toro do ramo atual
     v1 = glm.vec3(p1 - p0)
     v2 = glm.vec3(p2 - p1)
     v3 = glm.vec3(p3 - p2)
 
     theta = 0
-    in_radius = preferences.get_curve_thickness()
+    in_radius = 1
 
     d2 = min(0.15*glm.length(v2), 0.15*glm.length(v3))
     height = glm.length(v2)
@@ -165,16 +150,31 @@ class NewCurve ():
       return angle
     else:
       return -angle
+    
+  def __add_coord_to_point__(self, point, angle):
+    return (point.x, point.y, point.z, angle)
+  
+  def __build_points_array__(self):
+    i = 0
+    while i < len(self.indices)/4 - 1:
+      index = self.indices[4*i+2]
+      self.points[index*4+3] = self.angles[len(self.angles)- 1 - i]
+      i+=1
+  
+  def __vec3_to_vec4__(self, points):
+    l = []
+    i = 0
+    while i < len(points):
+      l.append(points[i])
+      l.append(points[i+1])
+      l.append(points[i+2])
+      l.append(0.0)
+      i = i + 3    
+    return l
   
   def draw(self):
     glBindVertexArray(self.vao)
     glDrawElements(GL_PATCHES, self.indices.size, GL_UNSIGNED_INT, None)
 
-  def __set_transformation_buffer__(self):
-    sh = Preferences.get_instance().get_shader()
-    self.mat_textbuffer.load(sh)
-
-  def __set_angle_buffer__(self):
-    sh = Preferences.get_instance().get_shader()
-    self.angles_textbuffer.load(sh)
+  
   

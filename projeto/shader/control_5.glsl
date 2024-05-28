@@ -1,11 +1,9 @@
 #version 410
 layout (vertices = 4) out;
 
-in vec3 pgeom[];
+in vec4 pgeom[];
 
 #define pi 3.14159265
-uniform samplerBuffer transform_buffer;
-uniform samplerBuffer angle_buffer;
 uniform int subdivision;
 
 patch out data{
@@ -19,6 +17,33 @@ patch out data{
 	float start_angle;
 } mesh_data;
 
+mat4 createOrthogonalBasis(vec3 d, vec3 y){
+	vec3 z = cross(normalize(d), y);
+	vec3 x = cross(normalize(y), normalize(z));
+
+	if(z == vec3(0.0f)){
+		z = cross(normalize(d), vec3(-d.y, d.x, 0.0f));
+		if(z == vec3(0.0f))
+			z = cross(normalize(d), vec3(-d.z, 0.0f, d.x));
+			if(z == vec3(0.0f))
+				z = cross(normalize(d), vec3(0.0f, -d.z, d.y));
+	}
+	x = cross(normalize(y), normalize(z));
+	return mat4(vec4(normalize(x),0.0f),
+				vec4(normalize(y), 0.0f),
+				vec4(normalize(z), 0.0f), 
+				vec4(0.0, 0.0, 0.0, 1.0));
+}
+
+void setTranslationMatrix(vec3 t, out mat4 t_matrix){
+	t_matrix = mat4(
+		vec4(1.0, 0.0, 0.0, 0.0),
+		vec4(0.0, 1.0, 0.0, 0.0),
+		vec4(0.0, 0.0, 1.0, 0.0),
+		vec4(t.x, t.y, t.z, 1.0)
+	);
+}
+
 float CalculateTorusAngle(vec3 c1, vec3 c2){
 
 	c1 = normalize(c1);
@@ -29,16 +54,18 @@ float CalculateTorusAngle(vec3 c1, vec3 c2){
 }
 
 void main(){
-	
+	mat4 translation_matrix;
 	mesh_data.no_curve = 0;
 
-	vec3 v1 = pgeom[1] - pgeom[0];
-	vec3 v2 = pgeom[2] - pgeom[1];
-	vec3 v3 = pgeom[3] - pgeom[2];
+	vec3 v1 = vec3(pgeom[1]) - vec3(pgeom[0]);
+	vec3 v2 = vec3(pgeom[2]) - vec3(pgeom[1]);
+	vec3 v3 = vec3(pgeom[3]) - vec3(pgeom[2]);
 
 	if( v3 == vec3(0.0f)){
 		v3 = (normalize(v2));
 	}
+
+	mat4 local_to_global = createOrthogonalBasis(v3, v2);
 
 	float beta = CalculateTorusAngle(v1,v2);
 	float theta = CalculateTorusAngle(v2,v3);
@@ -55,26 +82,10 @@ void main(){
 	}
 	
 	float r2 = d2*(1/tan(theta/2));
+	setTranslationMatrix(vec3(pgeom[1]), translation_matrix);
 
-	vec4 line1 = texelFetch(transform_buffer, gl_PrimitiveID*3);
-	vec4 line2 = texelFetch(transform_buffer, gl_PrimitiveID*3 + 1);
-	vec4 line3 = texelFetch(transform_buffer, gl_PrimitiveID*3 + 2);
-	mat4 transform = mat4(
-		vec4(line1.x, line2.x, line3.x, 0.0f),
-		vec4(line1.y, line2.y, line3.y, 0.0f),
-		vec4(line1.z, line2.z, line3.z, 0.0f),
-		vec4(line1.w, line2.w, line3.w, 1.0f)
-		);
-
-	int i = textureSize(angle_buffer);
-	float start = 0;
-	while(i >= gl_PrimitiveID){
-		float angle = texelFetch(angle_buffer, i).x;
-		start += angle;
-		i -= 1;
-	}
-	mesh_data.start_angle = start;
-	mesh_data.transformation = transform;
+	mesh_data.start_angle = pgeom[2].w;
+	mesh_data.transformation = translation_matrix*local_to_global;
 	mesh_data.angle = theta;
 	mesh_data.out_radius = r2;
 	mesh_data.height = length(v2);

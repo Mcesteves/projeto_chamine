@@ -75,3 +75,15 @@ class Utils:
       glm.vec4(0.0, 0.0, 0.0, 1.0)
     )
   
+  @staticmethod
+  def vec3_to_vec4(points):
+    l = []
+    i = 0
+    while i < len(points):
+      l.append(points[i])
+      l.append(points[i+1])
+      l.append(points[i+2])
+      l.append(0.0)
+      i = i + 3    
+    return l
+  

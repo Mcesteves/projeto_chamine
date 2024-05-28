@@ -19,7 +19,7 @@ class Preferences:
         self.sh.set_uniform("thickness",self.thickness)
         self.sh.set_uniform("subdivision",self.subdivision)
 
-    def set_curve_thickness(self, value):
+    def set_line_thickness(self, value):
         if self.sh:
             self.sh.set_uniform("thickness",value)
             self.thickness = value
@@ -29,7 +29,7 @@ class Preferences:
             self.sh.set_uniform("subdivision",value)
             self.subdivision = value
 
-    def get_curve_thickness(self):
+    def get_line_thickness(self):
         return self.thickness
     
     def get_subdivision(self):
@@ -39,6 +39,8 @@ class Preferences:
         return self.sh
     
     def get_instance():
+        if Preferences.__instance is None:
+            Preferences.__instance = Preferences()
         return Preferences.__instance
 
     
