@@ -2,6 +2,7 @@
 layout (vertices = 4) out;
 
 in vec4 pgeom[];
+in vec4 pcolor[];
 
 #define pi 3.14159265
 uniform int subdivision;
@@ -16,6 +17,8 @@ patch out data{
 	int no_curve;
 	float start_angle;
 } mesh_data;
+
+patch out vec4 color[3];
 
 mat4 createOrthogonalBasis(vec3 d, vec3 y){
 	vec3 z = cross(normalize(d), y);
@@ -91,6 +94,9 @@ void main(){
 	mesh_data.height = length(v2);
 	mesh_data.d1 = d1;
 	mesh_data.d2 = d2;
+
+	vec4 color_vec[3] = vec4[3](pcolor[1], pcolor[2], pcolor[3]);
+	color = color_vec;
 	
 	if (gl_InvocationID == 0)
 	{

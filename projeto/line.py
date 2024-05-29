@@ -8,18 +8,21 @@ from utils import *
 from texbuffer import *
 
 class Line ():
-  def __init__(self, points):
+  def __init__(self, points, colors):
     self.indices = []
     self.points = []
     self.angles = []
 
     #tratamento dos pontos
-    self.points = Utils.remove_repeated_sequence(points)
+    self.points = Utils.remove_repeated_sequence(points)#rever essa para remover as cores dos pontos repetidos
     self.__create_indices__()
     self.__calculate_transformation_matrices__()
     self.points = Utils.vec3_to_vec4(points)
     self.__build_points_array__()
     self.angles.clear()
+    self.colors = colors
+
+    self.points = self.__add_colors__()
     
     self.points = np.array(self.points, dtype= "float32")
     self.indices = np.array(self.indices, dtype= "uint32")
@@ -30,12 +33,15 @@ class Line ():
     self.vbo = glGenBuffers(1)
     glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
     glBufferData(GL_ARRAY_BUFFER, self.points.nbytes, self.points, GL_STATIC_DRAW)
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, None)
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 32, None)
     glEnableVertexAttribArray(0)
-
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 32, ctypes.c_void_p(16))
+    glEnableVertexAttribArray(1)
     self.ebo = glGenBuffers(1)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.indices.nbytes, self.indices, GL_STATIC_DRAW)
+
+    
 
   #calcula matriz de transformacao que sera usada no shader
   def __set_transformation__(self, v0, v1, v2):
@@ -160,6 +166,22 @@ class Line ():
       index = self.indices[4*i+2]
       self.points[index*4+3] = self.angles[len(self.angles)- 1 - i]
       i+=1
+
+  def __add_colors__(self):
+    l = []
+    i = 0
+    while i < len(self.points)/4:
+      l.append(self.points[4*i])
+      l.append(self.points[4*i+1])
+      l.append(self.points[4*i+2])
+      l.append(self.points[4*i+3])
+      l.append(self.colors[4*i])
+      l.append(self.colors[4*i+1])
+      l.append(self.colors[4*i+2])
+      l.append(self.colors[4*i+3])
+      i+=1
+
+    return l
   
   def __vec3_to_vec4__(self, points):
     l = []

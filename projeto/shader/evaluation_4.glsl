@@ -21,10 +21,13 @@ patch in data{
 	float start_angle;
 } mesh_data;
 
+patch in vec4 color[3];
+
 out data {
 	vec3 neye;
 	vec3 veye;
 	vec3 light;
+	vec4 color;
 } v;
 
 void main(){
@@ -74,6 +77,8 @@ void main(){
 	else
 		v.light = normalize(vec3(leye) - v.veye);
 	v.neye = normalize(vec3(mn*vnorm));
+
+	v.color = color[1];
 
 	gl_Position = mvp * vpos;
 }
