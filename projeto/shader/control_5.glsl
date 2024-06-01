@@ -16,6 +16,7 @@ patch out data{
 	float d2;
 	int no_curve;
 	float start_angle;
+	float next_height;
 } mesh_data;
 
 patch out vec4 color[3];
@@ -94,6 +95,7 @@ void main(){
 	mesh_data.height = length(v2);
 	mesh_data.d1 = d1;
 	mesh_data.d2 = d2;
+	mesh_data.next_height = length(v3);
 
 	vec4 color_vec[3] = vec4[3](pcolor[1], pcolor[2], pcolor[3]);
 	color = color_vec;

@@ -19,6 +19,7 @@ patch in data{
 	float d2;
 	int no_curve;
 	float start_angle;
+	float next_height;
 } mesh_data;
 
 patch in vec4 color[3];
@@ -31,13 +32,12 @@ out data {
 } v;
 
 void main(){
-
+	int is_curve = 0;
+	int change_color = 0;
 	float theta = 2*pi*gl_TessCoord.x + mesh_data.start_angle;
-	
 	vec4 vpos;
 	vec4 vnorm;
 	float phi;
-	float R = mesh_data.out_radius;
 	float cylinder_percent = 0.1f;
 	float k = mesh_data.height - mesh_data.d2 - mesh_data.d1;
 
@@ -46,9 +46,13 @@ void main(){
 	}
 
 	if (gl_TessCoord.y > cylinder_percent && mesh_data.no_curve == 0){
+		is_curve = 1;
 		phi = (1/(1-cylinder_percent))*mesh_data.angle*(gl_TessCoord.y - cylinder_percent);
-		vpos.x = -(-R + (R + thickness*cos(theta))*cos(phi));
-		vpos.y = mesh_data.height - mesh_data.d2 + (R + thickness*cos(theta))*sin(phi);
+		if(phi >= mesh_data.angle/2.0f){
+			change_color = 1;
+		}
+		vpos.x = -(-mesh_data.out_radius + (mesh_data.out_radius + thickness*cos(theta))*cos(phi));
+		vpos.y = mesh_data.height - mesh_data.d2 + (mesh_data.out_radius + thickness*cos(theta))*sin(phi);
 		vpos.z = thickness * sin(theta);
 		vpos.w = 1.0f;
 
@@ -78,7 +82,27 @@ void main(){
 		v.light = normalize(vec3(leye) - v.veye);
 	v.neye = normalize(vec3(mn*vnorm));
 
-	v.color = color[1];
+	float t;
+	vec4 color_1, color_2;
+	if(change_color == 0){
+		float h1 = mesh_data.height - mesh_data.d2;
+		t = (gl_TessCoord.y*(k+ mesh_data.d1) + mesh_data.d1)/h1;
+		if(is_curve == 1){
+			t = (mesh_data.height - mesh_data.d2 + gl_TessCoord.y*((mesh_data.d2/1-cylinder_percent)))/h1;
+		}
+		color_1 = color[0];
+		color_2 = color[1];
+	}
+	else{
+		float h2 = mesh_data.next_height - mesh_data.d1;
+		t = (gl_TessCoord.y*((mesh_data.d2/1-cylinder_percent)))/h2;
+		color_1 = color[1];
+		color_2 = color[2];
+	}
+	v.color.r = color_1.r + (color_2.r - color_1.r) * t;
+	v.color.g = color_1.g + (color_2.g - color_1.g) * t;
+	v.color.b = color_1.b + (color_2.b - color_1.b) * t;
+	v.color.a = color_1.a + (color_2.a - color_1.a) * t;
 
 	gl_Position = mvp * vpos;
 }
