@@ -17,6 +17,7 @@ patch out data{
 	int no_curve;
 	float start_angle;
 	float next_height;
+	float next_d2;
 } mesh_data;
 
 patch out vec4 color[3];
@@ -49,12 +50,17 @@ void setTranslationMatrix(vec3 t, out mat4 t_matrix){
 }
 
 float CalculateTorusAngle(vec3 c1, vec3 c2){
+	vec3 v1 = normalize(c1);
+	vec3 v2 = normalize(c2);
+	float dot_p = dot(v1, v2);
 
-	c1 = normalize(c1);
-	c2 = normalize(c2);
+	if(dot_p < -0.999999f && dot_p > -1.0f)
+		return pi;
 
-	float angle = acos(dot(c1, c2));
-	return angle;
+	if(dot_p < 1.0f && dot_p > 0.999999f)
+		return 0.0f;
+
+	return acos(dot(v1, v2));
 }
 
 void main(){
@@ -64,6 +70,7 @@ void main(){
 	vec3 v1 = vec3(pgeom[1]) - vec3(pgeom[0]);
 	vec3 v2 = vec3(pgeom[2]) - vec3(pgeom[1]);
 	vec3 v3 = vec3(pgeom[3]) - vec3(pgeom[2]);
+	vec3 v4 = vec3(pgeom[4]) - vec3(pgeom[3]);
 
 	if( v3 == vec3(0.0f)){
 		v3 = (normalize(v2));
@@ -96,6 +103,7 @@ void main(){
 	mesh_data.d1 = d1;
 	mesh_data.d2 = d2;
 	mesh_data.next_height = length(v3);
+	mesh_data.next_d2 = min(0.15*length(v3), 0.15*length(v4));
 
 	vec4 color_vec[3] = vec4[3](pcolor[1], pcolor[2], pcolor[3]);
 	color = color_vec;

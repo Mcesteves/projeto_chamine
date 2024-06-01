@@ -20,6 +20,7 @@ patch in data{
 	int no_curve;
 	float start_angle;
 	float next_height;
+	float next_d2;
 } mesh_data;
 
 patch in vec4 color[3];
@@ -44,11 +45,11 @@ void main(){
 	if(mesh_data.no_curve == 0){
 		k = k/cylinder_percent;
 	}
-
+	
 	if (gl_TessCoord.y > cylinder_percent && mesh_data.no_curve == 0){
 		is_curve = 1;
 		phi = (1/(1-cylinder_percent))*mesh_data.angle*(gl_TessCoord.y - cylinder_percent);
-		if(phi >= mesh_data.angle/2.0f){
+		if(phi > mesh_data.angle/2.0f){
 			change_color = 1;
 		}
 		vpos.x = -(-mesh_data.out_radius + (mesh_data.out_radius + thickness*cos(theta))*cos(phi));
@@ -65,6 +66,8 @@ void main(){
 		vpos.y = gl_TessCoord.y*k + mesh_data.d1;
 		vpos.z = thickness * sin(theta);
 		vpos.w = 1.0f;
+		if(vpos.y > mesh_data.height - mesh_data.d2)
+			change_color = 1;
 
 		vnorm = vpos;
 		vnorm.y = 0;
@@ -94,7 +97,7 @@ void main(){
 		color_2 = color[1];
 	}
 	else{
-		float h2 = mesh_data.next_height - mesh_data.d1;
+		float h2 = mesh_data.next_height - mesh_data.next_d2;
 		t = (gl_TessCoord.y*((mesh_data.d2/1-cylinder_percent)))/h2;
 		color_1 = color[1];
 		color_2 = color[2];

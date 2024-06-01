@@ -27,7 +27,7 @@ class Line ():
     self.points = np.array(self.points, dtype= "float32")
     self.indices = np.array(self.indices, dtype= "uint32")
 
-    glPatchParameteri(GL_PATCH_VERTICES, 4)
+    glPatchParameteri(GL_PATCH_VERTICES, 5)
     self.vao = glGenVertexArrays(1)
     glBindVertexArray(self.vao)
     self.vbo = glGenBuffers(1)
@@ -62,40 +62,49 @@ class Line ():
       self.indices.append(0)
       self.indices.append(1)
       self.indices.append(1)
+      self.indices.append(1)
     else:
       self.indices.append(id)
       self.indices.append(id)
       self.indices.append(id+1)
       self.indices.append(id+2)
+      if len(self.points) == 9:
+        self.indices.append(id+2)
+      else:
+        self.indices.append(id+3)
       while id < len(self.points)/3 - 2:
         self.indices.append(id)
         self.indices.append(id+1)
         self.indices.append(id+2)
-
         if id == len(self.points)/3 - 3:
           self.indices.append(id+2)
+          self.indices.append(id+2)
+        elif id == len(self.points)/3 - 6:
+          self.indices.append(id+3)
+          self.indices.append(id+3)
         else:
           self.indices.append(id+3)
+          self.indices.append(id+4)
         id +=1
 
   def __calculate_transformation_matrices__(self):
     self.matrices = []
     i= 0
-    while i < len(self.indices)/4:
-      p0 = glm.vec3(self.__get_point_from_idx__(self.indices[4*i + 1]))
-      p1 = glm.vec3(self.__get_point_from_idx__(self.indices[4*i + 2]))
-      p2 = glm.vec3(self.__get_point_from_idx__(self.indices[4*i + 3]))
+    while i < len(self.indices)/5:
+      p0 = glm.vec3(self.__get_point_from_idx__(self.indices[5*i + 1]))
+      p1 = glm.vec3(self.__get_point_from_idx__(self.indices[5*i + 2]))
+      p2 = glm.vec3(self.__get_point_from_idx__(self.indices[5*i + 3]))
       self.matrices.append(self.__set_transformation__(p0, p1, p2))
       i += 1
 
-    id = len(self.indices)//4 - 2
+    id = len(self.indices)//5 - 2
     angle_sum = 0
 
     while id >= 0:
-      p0 = glm.vec3(self.__get_point_from_idx__(self.indices[id*4]))
-      p1 = glm.vec3(self.__get_point_from_idx__(self.indices[id*4 + 1]))
-      p2 = glm.vec3(self.__get_point_from_idx__(self.indices[id*4 + 2]))
-      p3 = glm.vec3(self.__get_point_from_idx__(self.indices[id*4 + 3]))
+      p0 = glm.vec3(self.__get_point_from_idx__(self.indices[id*5]))
+      p1 = glm.vec3(self.__get_point_from_idx__(self.indices[id*5 + 1]))
+      p2 = glm.vec3(self.__get_point_from_idx__(self.indices[id*5 + 2]))
+      p3 = glm.vec3(self.__get_point_from_idx__(self.indices[id*5 + 3]))
       angle = self.__calculate_angle__(p0, p1, p2, p3, id)
       angle_sum += angle
       self.angles.append(angle_sum)
@@ -117,6 +126,9 @@ class Line ():
     height = glm.length(v2)
 
     torus_angle = Utils.calculate_torus_angle(v2,v3)
+    if torus_angle == 0:
+      return 0.0
+
     R = d2*(1/math.tan(torus_angle/2))
 
     phi = torus_angle
@@ -162,8 +174,8 @@ class Line ():
   
   def __build_points_array__(self):
     i = 0
-    while i < len(self.indices)/4 - 1:
-      index = self.indices[4*i+2]
+    while i < len(self.indices)/5 - 1:
+      index = self.indices[5*i+2]
       self.points[index*4+3] = self.angles[len(self.angles)- 1 - i]
       i+=1
 
