@@ -1,11 +1,12 @@
 #version 410
-layout (vertices = 4) out;
+layout (vertices = 5) out;
 
 in vec4 pgeom[];
 in vec4 pcolor[];
 
 #define pi 3.14159265
 uniform int subdivision;
+uniform float curve_percent;
 
 patch out data{
 	mat4 transformation;
@@ -18,6 +19,9 @@ patch out data{
 	float start_angle;
 	float next_height;
 	float next_d2;
+	float next_radius;
+	float next_angle;
+	float pre_angle;
 } mesh_data;
 
 patch out vec4 color[3];
@@ -75,14 +79,19 @@ void main(){
 	if( v3 == vec3(0.0f)){
 		v3 = (normalize(v2));
 	}
+	if( v4 == vec3(0.0f)){
+		v4 = normalize(v3);
+	}
 
 	mat4 local_to_global = createOrthogonalBasis(v3, v2);
 
 	float beta = CalculateTorusAngle(v1,v2);
 	float theta = CalculateTorusAngle(v2,v3);
+	float alpha = CalculateTorusAngle(v3,v4);
 
-	float d1 = min(0.15*length(v1), 0.15*length(v2));
-	float d2 = min(0.15*length(v2), 0.15*length(v3));
+	float d1 = min(curve_percent*length(v1), curve_percent*length(v2));
+	float d2 = min(curve_percent*length(v2), curve_percent*length(v3));
+	float next_d2 = min(curve_percent*length(v3), curve_percent*length(v4));
 	
 	if(beta == 0.0f){
 		d1 = 0.0f;
@@ -91,8 +100,12 @@ void main(){
 		d2 = 0.0f;
 		mesh_data.no_curve = 1;
 	}
+	if(alpha == 0.0f){
+		next_d2 = 0.0f;
+	}
 	
 	float r2 = d2*(1/tan(theta/2));
+	float next_radius = next_d2*(1/tan(alpha/2));
 	setTranslationMatrix(vec3(pgeom[1]), translation_matrix);
 
 	mesh_data.start_angle = pgeom[2].w;
@@ -103,7 +116,10 @@ void main(){
 	mesh_data.d1 = d1;
 	mesh_data.d2 = d2;
 	mesh_data.next_height = length(v3);
-	mesh_data.next_d2 = min(0.15*length(v3), 0.15*length(v4));
+	mesh_data.next_d2 = next_d2;
+	mesh_data.next_radius = next_radius;
+	mesh_data.next_angle = alpha;
+	mesh_data.pre_angle = beta;
 
 	vec4 color_vec[3] = vec4[3](pcolor[1], pcolor[2], pcolor[3]);
 	color = color_vec;
