@@ -16,6 +16,8 @@ class Line ():
     #tratamento dos pontos
     self.points = Utils.remove_repeated_sequence(points)#rever essa para remover as cores dos pontos repetidos
     self.__create_indices__()
+    print(self.points)
+    print(self.indices)
     self.__calculate_transformation_matrices__()
     self.points = Utils.vec3_to_vec4(points)
     self.__build_points_array__()
@@ -26,6 +28,7 @@ class Line ():
     
     self.points = np.array(self.points, dtype= "float32")
     self.indices = np.array(self.indices, dtype= "uint32")
+   
 
     glPatchParameteri(GL_PATCH_VERTICES, 5)
     self.vao = glGenVertexArrays(1)
@@ -76,12 +79,12 @@ class Line ():
         self.indices.append(id)
         self.indices.append(id+1)
         self.indices.append(id+2)
-        if id == len(self.points)/3 - 3:
-          self.indices.append(id+2)
-          self.indices.append(id+2)
-        elif id == len(self.points)/3 - 6:
+        if id == len(self.points)/3 - 4:
           self.indices.append(id+3)
           self.indices.append(id+3)
+        elif id == len(self.points)/3 - 3:
+          self.indices.append(id+2)
+          self.indices.append(id+2)
         else:
           self.indices.append(id+3)
           self.indices.append(id+4)

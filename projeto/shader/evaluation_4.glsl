@@ -49,7 +49,7 @@ void main(){
 		k = k/cylinder_percent;
 	}
 	
-	if (gl_TessCoord.y > cylinder_percent && mesh_data.no_curve == 0){
+	if (gl_TessCoord.y >= cylinder_percent && mesh_data.no_curve == 0){
 		is_curve = 1;
 		phi = (1/(1-cylinder_percent))*mesh_data.angle*(gl_TessCoord.y - cylinder_percent);
 		if(phi >= mesh_data.angle/2.0f){
@@ -69,8 +69,8 @@ void main(){
 		vpos.y = gl_TessCoord.y*k + mesh_data.d1;
 		vpos.z = thickness * sin(theta);
 		vpos.w = 1.0f;
-		//if(vpos.y > mesh_data.height - mesh_data.d2)
-			//change_color = 1;
+		if(vpos.y > mesh_data.height - mesh_data.d2)
+			change_color = 1;
 
 		vnorm = vpos;
 		vnorm.y = 0;
@@ -94,50 +94,44 @@ void main(){
 	if(change_color == 0){
 		if(mesh_data.no_curve == 1)
 			if(mesh_data.d1 == 0.0f){
-				h1 = mesh_data.height - mesh_data.d2/2.0f;
+				h1 = mesh_data.height;
 				t = (gl_TessCoord.y * h1 + mesh_data.d1)/h1;
 			}
 			else{
-				h1 = mesh_data.height - mesh_data.d2/2.0f - mesh_data.d1 + mesh_data.pre_angle*mesh_data.d1*(1/tan(mesh_data.pre_angle/2)/2.0f);
+				h1 = mesh_data.height - mesh_data.d1 + mesh_data.pre_angle*mesh_data.d1*(1/tan(mesh_data.pre_angle/2)/2.0f);
 				t = (gl_TessCoord.y * h1 + mesh_data.pre_angle*mesh_data.d1*(1/tan(mesh_data.pre_angle/2)/2.0f))/h1;
 			}
 		else{
 			if(mesh_data.d1 == 0.0f){
 				h1 = mesh_data.height - mesh_data.d2 + c/2.0f;
-				t = (gl_TessCoord.y * h1 + mesh_data.d1)/h1;
+				t = (gl_TessCoord.y * h1/cylinder_percent + mesh_data.d1)/h1;
 			}	
 			else{
-				h1 = mesh_data.height - mesh_data.d2 + c/2.0f - mesh_data.d1 + mesh_data.pre_angle*mesh_data.d1*(1/tan(mesh_data.pre_angle/2)/2.0f);
-				t = (gl_TessCoord.y * h1 + mesh_data.pre_angle*mesh_data.d1*(1/tan(mesh_data.pre_angle/2)/2.0f))/h1;
+				h1 = mesh_data.height - mesh_data.d2 + c/2.0f - mesh_data.d1 + mesh_data.pre_angle*mesh_data.d1*(1/tan(mesh_data.pre_angle/2))/2.0f;
+				t = (gl_TessCoord.y * h1/cylinder_percent + mesh_data.pre_angle*mesh_data.d1*(1/tan(mesh_data.pre_angle/2)/2.0f))/h1;
 			}
-		}
-		if(is_curve == 1){
-			t = (gl_TessCoord.y*(1/(1-cylinder_percent))*c/2.0f + h1 - c/2.0f)/h1;
+			if(is_curve == 1){
+				t = ((((gl_TessCoord.y - cylinder_percent)*(1/((1-cylinder_percent)/2.0f)))*c/2.0f) + h1 - c/2.0f)/h1;
+			}
 		}
 		color_1 = color[0];
 		color_2 = color[1];
 	}
 	else{
 		float h2;
-		if(mesh_data.no_curve == 1){
-			h2 = mesh_data.next_height - mesh_data.next_d2/2.0f;
-			t = (gl_TessCoord.y*(1/(1-cylinder_percent))*mesh_data.d2/2.0f)/h2;
+		if(mesh_data.next_angle == 0.0f){
+			h2 = mesh_data.next_height - mesh_data.d2 + c/2.0f;
+			t = (((gl_TessCoord.y - cylinder_percent -((1-cylinder_percent)/2.0f))*(1/((1 - cylinder_percent)/2.0f)))*c/2.0f)/h2;
 		}
 		else{
-			if(mesh_data.next_angle == 0.0f){
-				h2 = mesh_data.next_height - mesh_data.next_d2/2.0f;
-				t = (gl_TessCoord.y*(1/(1-cylinder_percent))*mesh_data.d2/2.0f)/h2;
-			}
-			else{
-				float c2 = mesh_data.next_angle*mesh_data.next_radius;
-				h2 = mesh_data.next_height - mesh_data.next_d2 + c2/2.0f;
-				t = (gl_TessCoord.y*(1/(1-cylinder_percent))*c/2.0f)/h2;
-			}			
-		}
-			
+			float c2 = mesh_data.next_angle*mesh_data.next_radius;
+			h2 = mesh_data.next_height - mesh_data.next_d2 + c2/2.0f - mesh_data.d2 + c/2.0f;
+			t = (((gl_TessCoord.y - cylinder_percent -((1-cylinder_percent)/2.0f))*(1/((1 - cylinder_percent)/2.0f)))*c/2.0f)/h2;
+		}	
 		color_1 = color[1];
-		color_2 = color[2];
+		color_2 = color[2];		
 	}
+	
 	v.color.r = color_1.r + (color_2.r - color_1.r) * t;
 	v.color.g = color_1.g + (color_2.g - color_1.g) * t;
 	v.color.b = color_1.b + (color_2.b - color_1.b) * t;
