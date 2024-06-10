@@ -24,9 +24,9 @@ def initialize (win):
 
   global shader
   shader = Shader()
-  shader.attach_vertex_shader("shader/vertex.glsl")
+  shader.attach_vertex_shader("shader/vertex_old.glsl")
   shader.attach_tesselation_shader("shader/control_2.glsl", "shader/evaluation_2.glsl")
-  shader.attach_fragment_shader("shader/fragment.glsl")
+  shader.attach_fragment_shader("shader/fragment_old.glsl")
   shader.link()  
 
 def display ():

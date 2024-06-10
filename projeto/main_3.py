@@ -8,25 +8,39 @@ from curve import*
 def initialize (win):
   glClearColor(0,0,0,1)
   glEnable(GL_DEPTH_TEST)
-  #glEnable(GL_CULL_FACE)
+  glEnable(GL_CULL_FACE)
+  glPolygonMode(GL_FRONT, GL_LINE)
+  #glCullFace(GL_FRONT); 
 
   global curve
   curve = Curve([
-     0.0, 0.0, 0.0,
-     1.0, 0.0, 0.0,
-     3.0, 3.0, 2.0,
-     5.0, 0.0, 0.0,
-     8.0, 1.0, 0.0,
-     8.0, 2.0, 0.0,
-     -5.0, 8.0, 0.0])
+     0.0, 1.0, 0.0,
+     2.0, 2.0, 2.0,
+     3.0, 0.0, 0.0,
+     5.0, 1.0, 0.0,
+    #  8.0, 4.0, 0.0,
+    #  -5.0, 8.0, 0.0,
+    #  -10.0, 8.0, -5.0,
+    #  2.0, 4.0, 0.0,
+    #  6.0, -10.0, 2.0,
+    #  0.0, 0.0, 0.0,
+    #  -8.0, 1.0, 3.0,
+    #  -5.0, 0.0, 0.0,
+    #  -10, -6.0, 5.0,
+    #  5.0, -3.0, -5.0,
+    #  1.0, 7.0, 9.0,
+    #  2.0, 1.0, 15.0,
+    #  2.0, 5.0, 0.0,
+    #  2.0, 8.0, 0.0,
+    #  2.0, -2.0, 0.0,
+    #  -2.0, -1.0, 0.0
+    ])
   
-  global curve1
-  curve1 = Curve([
-     -5.0, 8.0, 0.0,
-     0.0, 4.0, 0.0,
-     1.0, 0.0, 0.0,
-     3.0, 3.0, 2.0,
-     -5.0, 8.0, 0.0])
+#   global curve1
+#   curve1 = Curve([
+#      0.0, 0.0, 0.0,
+#      1.0, 0.0, 0.0,
+#      3.0, 3.0, 2.0])
   
   global camera
   camera = Camera(0.0, 0.0, 17.0)
@@ -35,9 +49,9 @@ def initialize (win):
 
   global shader
   shader = Shader()
-  shader.attach_vertex_shader("shader/vertex.glsl")
+  shader.attach_vertex_shader("shader/vertex_old.glsl")
   shader.attach_tesselation_shader("shader/control_4.glsl", "shader/evaluation_3.glsl")
-  shader.attach_fragment_shader("shader/fragment.glsl")
+  shader.attach_fragment_shader("shader/fragment_old.glsl")
   shader.link()  
 
 def display ():
@@ -55,7 +69,7 @@ def display ():
   shader.set_uniform("mn",mn)
 
   curve.draw()
-  curve1.draw()
+  #curve1.draw()
 
 def resize(win, width, height):
    glViewport(0, 0, width, height)

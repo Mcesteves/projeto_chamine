@@ -3,21 +3,28 @@ from OpenGL.GL import *
 import numpy as np
 import glm
 
-from preferences import Preferences
+from shader import Shader
 from utils import *
-from texbuffer import *
 
 class Line ():
-  def __init__(self, points, colors):
+  def __init__(self, points, colors, camera, thickness = 0.05, subdivision = 16, curve_percent = 0.15):
+    
+    if camera == None:
+       print("Erro")
+       return
+    
+    self.camera = camera
+    self.__set_shader__()
+    self.set_line_thickness(thickness)
+    self.set_percent(curve_percent)
+    self.set_subdivision(subdivision)
+
     self.indices = []
     self.points = []
     self.angles = []
-
     #tratamento dos pontos
     self.points = Utils.remove_repeated_sequence(points)#rever essa para remover as cores dos pontos repetidos
     self.__create_indices__()
-    print(self.points)
-    print(self.indices)
     self.__calculate_transformation_matrices__()
     self.points = Utils.vec3_to_vec4(points)
     self.__build_points_array__()
@@ -29,7 +36,6 @@ class Line ():
     self.points = np.array(self.points, dtype= "float32")
     self.indices = np.array(self.indices, dtype= "uint32")
    
-
     glPatchParameteri(GL_PATCH_VERTICES, 5)
     self.vao = glGenVertexArrays(1)
     glBindVertexArray(self.vao)
@@ -44,7 +50,60 @@ class Line ():
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, self.indices.nbytes, self.indices, GL_STATIC_DRAW)
 
+  def set_line_thickness(self, value):
+        if self.sh:
+            self.sh.set_uniform("thickness",value)
+            self.thickness = value
+
+  def set_subdivision(self,value):
+      if self.sh:
+          self.sh.set_uniform("subdivision",value)
+          self.subdivision = value
+
+  def set_percent(self, value):
+      if self.sh:
+          if value > 0.5:
+              value = 0.5
+          if value < 0.05:
+              value = 0.05
+          self.sh.set_uniform("curve_percent", value)
+          self.curve_percent = value
+
+  def get_line_thickness(self):
+      return self.thickness
     
+  def get_subdivision(self):
+      return self.subdivision
+  
+  def get_shader(self):
+      return self.sh
+  
+  def get_percent(self):
+      return self.curve_percent
+  
+  def draw(self):
+    self.sh.use_program()
+    stack = [glm.mat4(1.0)]  
+    mv = stack[-1]
+    if self.sh.get_lightning_space() == "camera":
+      mv = self.camera.get_view_matrix() * mv
+    mn = glm.transpose(glm.inverse(mv))
+    mvp = self.camera.get_projection_matrix() * mv * stack[-1]
+    self.sh.set_uniform("mvp", mvp)
+    self.sh.set_uniform("mv", mv)
+    self.sh.set_uniform("mn", mn)
+
+    glBindVertexArray(self.vao)
+    glDrawElements(GL_PATCHES, self.indices.size, GL_UNSIGNED_INT, None)
+
+  ######################## Private methods ########################
+  def __set_shader__(self):
+    self.sh = Shader()
+    self.sh.attach_vertex_shader("shader/vertex.glsl")
+    self.sh.attach_tesselation_shader("shader/control_5.glsl", "shader/evaluation_4.glsl")
+    self.sh.attach_fragment_shader("shader/fragment.glsl")
+    self.sh.link() 
+    self.sh.use_program()
 
   #calcula matriz de transformacao que sera usada no shader
   def __set_transformation__(self, v0, v1, v2):
@@ -102,7 +161,6 @@ class Line ():
 
     id = len(self.indices)//5 - 2
     angle_sum = 0
-
     while id >= 0:
       p0 = glm.vec3(self.__get_point_from_idx__(self.indices[id*5]))
       p1 = glm.vec3(self.__get_point_from_idx__(self.indices[id*5 + 1]))
@@ -129,7 +187,7 @@ class Line ():
     height = glm.length(v2)
 
     torus_angle = Utils.calculate_torus_angle(v2,v3)
-    if torus_angle == 0:
+    if torus_angle == 0:#rever isso aqui
       return 0.0
 
     R = d2*(1/math.tan(torus_angle/2))
@@ -159,7 +217,8 @@ class Line ():
     vec2 = cylinder_point - cylinder_center
 
     angle = Utils.calculate_torus_angle(vec1, vec2)
-    
+
+    #teste com correcao para saber para onde rotacionar    
     x = -(-R + (R + in_radius*math.cos(theta+angle))*math.cos(phi))
     y = height - d2 + (R + in_radius*math.cos(theta+angle))*math.sin(phi)
     z = in_radius * math.sin(theta+angle)
@@ -197,21 +256,6 @@ class Line ():
       i+=1
 
     return l
-  
-  def __vec3_to_vec4__(self, points):
-    l = []
-    i = 0
-    while i < len(points):
-      l.append(points[i])
-      l.append(points[i+1])
-      l.append(points[i+2])
-      l.append(0.0)
-      i = i + 3    
-    return l
-  
-  def draw(self):
-    glBindVertexArray(self.vao)
-    glDrawElements(GL_PATCHES, self.indices.size, GL_UNSIGNED_INT, None)
 
   
   

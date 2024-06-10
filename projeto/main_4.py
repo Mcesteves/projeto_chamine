@@ -3,8 +3,6 @@ import glfw
 
 from camera import *
 from line import *
-from preferences import *
-from shader import *
 
 def initialize (win):
   glClearColor(0,0,0,1)
@@ -17,17 +15,6 @@ def initialize (win):
   camera = Camera(0.0, 0.0, 15.0)
   arcball = camera.create_arcball()
   arcball.attach(win)
-
-  global shader
-  shader = Shader()
-  shader.attach_vertex_shader("shader/vertex.glsl")
-  shader.attach_tesselation_shader("shader/control_5.glsl", "shader/evaluation_4.glsl")
-  shader.attach_fragment_shader("shader/fragment.glsl")
-  shader.link() 
-  shader.use_program()
-
-  global preferences
-  preferences = Preferences(shader)
 
   global curve
   curve = Line([
@@ -75,7 +62,7 @@ def initialize (win):
     #  1.0, 0.0, 0.0, 1.0,
     #  1.0, 0.0, 0.0, 1.0,
     #  1.0, 0.0, 0.0, 1.0
-     ])
+     ], camera)
   
 #   global curve1
 #   curve1 = Line([
@@ -88,26 +75,23 @@ def initialize (win):
 #      -9.0, 5.0, 0.0,
 #      -14.0, 3.0, -5.0,
 #      -5.0, 4.0, 0.0,
-#      2.0, -6.0, 2.0
-#      ])
-  
-  preferences.set_line_thickness(0.08)
-  preferences.set_subdivision(16)
+#      #2.0, -6.0, 2.0
+#      ],[
+#      1.0, 0.0, 0.0, 1.0,
+#      1.0, 1.0, 0.0, 1.0,
+#      1.0, 0.0, 1.0, 1.0,
+#      0.0, 1.0, 0.0, 1.0,
+#      0.0, 0.0, 1.0, 1.0,
+#      1.0, 0.0, 0.0, 1.0,
+#      0.2, 0.7, 0.5, 1.0,
+#      0.4, 1.0, 0.2, 1.0,
+#      0.0, 0.0, 1.0, 1.0,
+#      #0.0, 0.0, 1.0, 1.0,
+#      ], camera
+#      )
 
 def display ():
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-  shader.use_program()
-  global stack
-  stack = [glm.mat4(1.0)]  
-  mv = stack[-1]
-  if shader.get_lightning_space() == "camera":
-     mv = camera.get_view_matrix() * mv
-  mn = glm.transpose(glm.inverse(mv))
-  mvp = camera.get_projection_matrix() * mv * stack[-1]
-  shader.set_uniform("mvp",mvp)
-  shader.set_uniform("mv",mv)
-  shader.set_uniform("mn",mn)
-  
   curve.draw()
   #curve1.draw()
 
@@ -135,14 +119,14 @@ def main():
     glfw.make_context_current(win)
 
     
-    print("OpenGL version: ",glGetString(GL_VERSION))
+    print("OpenGL version: ", glGetString(GL_VERSION))
 
     initialize(win)
 
     # Loop until the user closes the window
     while not glfw.window_should_close(win):
-        # Render here, e.g. using pyOpenGL
-        display()
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        curve.draw()
 
         # Swap front and back buffers
         glfw.swap_buffers(win)

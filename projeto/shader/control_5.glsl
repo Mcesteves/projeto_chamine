@@ -19,7 +19,6 @@ patch out data{
 	float start_angle;
 	float next_height;
 	float next_d2;
-	float next_radius;
 	float next_angle;
 	float pre_angle;
 } mesh_data;
@@ -105,7 +104,6 @@ void main(){
 	}
 	
 	float r2 = d2*(1/tan(theta/2));
-	float next_radius = next_d2*(1/tan(alpha/2));
 	setTranslationMatrix(vec3(pgeom[1]), translation_matrix);
 
 	mesh_data.start_angle = pgeom[2].w;
@@ -117,7 +115,6 @@ void main(){
 	mesh_data.d2 = d2;
 	mesh_data.next_height = length(v3);
 	mesh_data.next_d2 = next_d2;
-	mesh_data.next_radius = next_radius;
 	mesh_data.next_angle = alpha;
 	mesh_data.pre_angle = beta;
 

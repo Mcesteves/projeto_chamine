@@ -21,7 +21,6 @@ patch in data{
 	float start_angle;
 	float next_height;
 	float next_d2;
-	float next_radius;
 	float next_angle;
 	float pre_angle;
 } mesh_data;
@@ -88,9 +87,12 @@ void main(){
 		v.light = normalize(vec3(leye) - v.veye);
 	v.neye = normalize(vec3(mn*vnorm));
 
+	// calculo da cor
 	float t, h1;
 	float c = (mesh_data.angle)*mesh_data.out_radius;
+	float previous_c = mesh_data.pre_angle*mesh_data.d1*(1/tan(mesh_data.pre_angle/2));
 	vec4 color_1, color_2;
+
 	if(change_color == 0){
 		if(mesh_data.no_curve == 1)
 			if(mesh_data.d1 == 0.0f){
@@ -98,17 +100,17 @@ void main(){
 				t = (gl_TessCoord.y * h1 + mesh_data.d1)/h1;
 			}
 			else{
-				h1 = mesh_data.height - mesh_data.d1 + mesh_data.pre_angle*mesh_data.d1*(1/tan(mesh_data.pre_angle/2)/2.0f);
-				t = (gl_TessCoord.y * h1 + mesh_data.pre_angle*mesh_data.d1*(1/tan(mesh_data.pre_angle/2)/2.0f))/h1;
+				h1 = mesh_data.height - mesh_data.d1 + previous_c/2.0f;
+				t = (gl_TessCoord.y * h1 + previous_c/2.0f)/h1;
 			}
 		else{
 			if(mesh_data.d1 == 0.0f){
 				h1 = mesh_data.height - mesh_data.d2 + c/2.0f;
-				t = (gl_TessCoord.y * h1/cylinder_percent + mesh_data.d1)/h1;
+				t = (gl_TessCoord.y * h1/cylinder_percent)/h1;
 			}	
 			else{
-				h1 = mesh_data.height - mesh_data.d2 + c/2.0f - mesh_data.d1 + mesh_data.pre_angle*mesh_data.d1*(1/tan(mesh_data.pre_angle/2))/2.0f;
-				t = (gl_TessCoord.y * h1/cylinder_percent + mesh_data.pre_angle*mesh_data.d1*(1/tan(mesh_data.pre_angle/2)/2.0f))/h1;
+				h1 = mesh_data.height - mesh_data.d2 + c/2.0f - mesh_data.d1 + previous_c/2.0f;
+				t = (gl_TessCoord.y * h1/cylinder_percent + previous_c/2.0f)/h1;
 			}
 			if(is_curve == 1){
 				t = ((((gl_TessCoord.y - cylinder_percent)*(1/((1-cylinder_percent)/2.0f)))*c/2.0f) + h1 - c/2.0f)/h1;
@@ -124,7 +126,8 @@ void main(){
 			t = (((gl_TessCoord.y - cylinder_percent -((1-cylinder_percent)/2.0f))*(1/((1 - cylinder_percent)/2.0f)))*c/2.0f)/h2;
 		}
 		else{
-			float c2 = mesh_data.next_angle*mesh_data.next_radius;
+			float next_radius = mesh_data.next_d2*(1/tan(mesh_data.next_angle/2));
+			float c2 = mesh_data.next_angle*next_radius;
 			h2 = mesh_data.next_height - mesh_data.next_d2 + c2/2.0f - mesh_data.d2 + c/2.0f;
 			t = (((gl_TessCoord.y - cylinder_percent -((1-cylinder_percent)/2.0f))*(1/((1 - cylinder_percent)/2.0f)))*c/2.0f)/h2;
 		}	

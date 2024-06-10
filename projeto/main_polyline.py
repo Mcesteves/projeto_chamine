@@ -59,6 +59,7 @@ def display ():
   shader.set_uniform("mvp",mvp)
   shader.set_uniform("mv",mv)
   shader.set_uniform("mn",mn)
+  shader.set_uniform("light",glm.vec4(0.0, 0.0, 4.0, 1.0))
   
   curve.draw()
 

@@ -12,7 +12,6 @@ class Camera ():
     self.eye = glm.vec3(x,y,z)
     self.up = glm.vec3(0,1,0)
     self.arcball = None
-    #self.reference = None
 
   def set_angle (self, fov_y):
     self.fov_y = fov_y
