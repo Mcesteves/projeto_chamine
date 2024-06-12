@@ -48,7 +48,7 @@ void main(){
 		k = k/cylinder_percent;
 	}
 	
-	if (gl_TessCoord.y >= cylinder_percent && mesh_data.no_curve == 0){
+	if (gl_TessCoord.y > cylinder_percent && mesh_data.no_curve == 0){
 		is_curve = 1;
 		phi = (1/(1-cylinder_percent))*mesh_data.angle*(gl_TessCoord.y - cylinder_percent);
 		if(phi >= mesh_data.angle/2.0f){

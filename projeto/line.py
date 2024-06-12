@@ -22,8 +22,7 @@ class Line ():
     self.indices = []
     self.points = []
     self.angles = []
-    #tratamento dos pontos
-    self.points = Utils.remove_repeated_sequence(points)#rever essa para remover as cores dos pontos repetidos
+    self.points = points
     self.__create_indices__()
     self.__calculate_transformation_matrices__()
     self.points = Utils.vec3_to_vec4(points)
@@ -159,9 +158,9 @@ class Line ():
       self.matrices.append(self.__set_transformation__(p0, p1, p2))
       i += 1
 
-    id = len(self.indices)//5 - 2
+    id = 0
     angle_sum = 0
-    while id >= 0:
+    while id <= len(self.indices)//5 - 2:
       p0 = glm.vec3(self.__get_point_from_idx__(self.indices[id*5]))
       p1 = glm.vec3(self.__get_point_from_idx__(self.indices[id*5 + 1]))
       p2 = glm.vec3(self.__get_point_from_idx__(self.indices[id*5 + 2]))
@@ -169,7 +168,7 @@ class Line ():
       angle = self.__calculate_angle__(p0, p1, p2, p3, id)
       angle_sum += angle
       self.angles.append(angle_sum)
-      id -= 1
+      id += 1
 
     self.matrices.clear()
 
@@ -181,9 +180,9 @@ class Line ():
     v3 = glm.vec3(p3 - p2)
 
     theta = 0
-    in_radius = 1
+    in_radius = self.thickness
 
-    d2 = min(0.15*glm.length(v2), 0.15*glm.length(v3))
+    d2 = min(self.curve_percent*glm.length(v2), self.curve_percent*glm.length(v3))
     height = glm.length(v2)
 
     torus_angle = Utils.calculate_torus_angle(v2,v3)
@@ -192,10 +191,10 @@ class Line ():
 
     R = d2*(1/math.tan(torus_angle/2))
 
-    phi = torus_angle
+    phi = (1/(1.0-0.1))*torus_angle*(1.0 - 0.1)
 
-    x = -(-R + (R + in_radius*math.cos(theta))*math.cos(phi))
-    y = height - d2 + (R + in_radius*math.cos(theta))*math.sin(phi)
+    x = -(-R + (R + in_radius)*math.cos(phi))
+    y = height - d2 + (R + in_radius)*math.sin(phi)
     z = in_radius * math.sin(theta)
     w = 1.0
 
@@ -216,19 +215,35 @@ class Line ():
     vec1 = torus_point - torus_center
     vec2 = cylinder_point - cylinder_center
 
-    angle = Utils.calculate_torus_angle(vec1, vec2)
+    angle = Utils.calculate_torus_angle(vec2, vec1)
 
     #teste com correcao para saber para onde rotacionar    
-    x = -(-R + (R + in_radius*math.cos(theta+angle))*math.cos(phi))
-    y = height - d2 + (R + in_radius*math.cos(theta+angle))*math.sin(phi)
-    z = in_radius * math.sin(theta+angle)
+    x = -in_radius * math.cos(angle)
+    y = d2
+    z = in_radius * math.sin(angle)
     w = 1.0
 
-    new_torus_point = self.matrices[id]*glm.vec4(x,y,z,w)
+    new_point = self.matrices[id+1]*glm.vec4(x,y,z,w)
 
-    if Utils.is_vertix_equal(cylinder_point, new_torus_point):
+    # print("torus_point")
+    # print(torus_point)
+    # print("torus_center")
+    # print(torus_center)
+    # print("cylinder_point")
+    # print(cylinder_point)
+    # print("cylinder_center")
+    # print(cylinder_center)
+    # print("new_torus_point")
+    # print(new_point)
+    if Utils.is_vertix_equal(torus_point, new_point):
       return angle
     else:
+      x = -in_radius * math.cos(-angle)
+      y = d2
+      z = in_radius * math.sin(-angle)
+      w = 1.0
+
+      new_point = self.matrices[id+1]*glm.vec4(x,y,z,w)
       return -angle
     
   def __add_coord_to_point__(self, point, angle):
@@ -238,7 +253,7 @@ class Line ():
     i = 0
     while i < len(self.indices)/5 - 1:
       index = self.indices[5*i+2]
-      self.points[index*4+3] = self.angles[len(self.angles)- 1 - i]
+      self.points[index*4+3] = self.angles[i]
       i+=1
 
   def __add_colors__(self):

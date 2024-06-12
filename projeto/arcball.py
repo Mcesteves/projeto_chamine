@@ -33,9 +33,9 @@ class Arcball:
         glfw.set_cursor_pos_callback(win,dummy)        # callback disabled
     def mousewheel(win, xoffset, yoffset):
       if yoffset > 0:
-        self.__zoom(1.05)
+        self.__zoom(1.01)
       elif yoffset < 0:
-        self.__zoom(1.0/1.05)
+        self.__zoom(1.0/1.01)
 
     glfw.set_mouse_button_callback(win,mousebutton)
     glfw.set_scroll_callback(win, mousewheel)

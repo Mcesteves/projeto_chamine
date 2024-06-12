@@ -26,6 +26,9 @@ patch out data{
 patch out vec4 color[3];
 
 mat4 createOrthogonalBasis(vec3 d, vec3 y){
+	if(d == vec3(0.0f)){
+		d = vec3(1.0f, 0.0f, 0.0f);
+	}
 	vec3 z = cross(normalize(d), y);
 	vec3 x = cross(normalize(y), normalize(z));
 
@@ -75,14 +78,14 @@ void main(){
 	vec3 v3 = vec3(pgeom[3]) - vec3(pgeom[2]);
 	vec3 v4 = vec3(pgeom[4]) - vec3(pgeom[3]);
 
+	mat4 local_to_global = createOrthogonalBasis(v3, v2);
+
 	if( v3 == vec3(0.0f)){
 		v3 = (normalize(v2));
 	}
 	if( v4 == vec3(0.0f)){
 		v4 = normalize(v3);
 	}
-
-	mat4 local_to_global = createOrthogonalBasis(v3, v2);
 
 	float beta = CalculateTorusAngle(v1,v2);
 	float theta = CalculateTorusAngle(v2,v3);
@@ -106,7 +109,7 @@ void main(){
 	float r2 = d2*(1/tan(theta/2));
 	setTranslationMatrix(vec3(pgeom[1]), translation_matrix);
 
-	mesh_data.start_angle = pgeom[2].w;
+	mesh_data.start_angle = pgeom[1].w;
 	mesh_data.transformation = translation_matrix*local_to_global;
 	mesh_data.angle = theta;
 	mesh_data.out_radius = r2;

@@ -57,6 +57,8 @@ class Utils:
   def set_rotation_matrix(v0, v1, v2):
     y = v1 - v0
     x = v2 - v1
+    if(x == glm.vec3(0)):
+      x = glm.vec3(1.0, 0.0, 0.0)
     z = glm.cross(glm.normalize(x), y)
 
     if math.isnan(z.x) or z == glm.vec3(0):
@@ -66,7 +68,7 @@ class Utils:
         if math.isnan(z.x) or z == glm.vec3(0):
           z = glm.cross(glm.normalize(y), glm.vec3(0, -y.z, y.y))
       
-    x = glm.cross(glm.normalize(y), z)
+    x = glm.cross(glm.normalize(y), glm.normalize(z))
 
     return glm.mat4x4(
       glm.vec4(glm.normalize(x), 0.0),
