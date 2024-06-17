@@ -7,7 +7,7 @@ from shader import Shader
 from utils import *
 
 class Line ():
-  def __init__(self, points, colors, camera, thickness = 0.05, subdivision = 16, curve_percent = 0.15):
+  def __init__(self, points, colors, camera, thickness = 0.05, subdivision = 4, curve_percent = 0.15, cylinder_percent = 0.1):
     
     if camera == None:
        print("Erro")
@@ -18,10 +18,13 @@ class Line ():
     self.set_line_thickness(thickness)
     self.set_percent(curve_percent)
     self.set_subdivision(subdivision)
+    self.set_cylinder_percent(cylinder_percent)
 
     self.indices = []
     self.points = []
     self.angles = []
+    # results = Utils.get_m_and_mins(points)
+    # Utils.normalize_line(results, points)
     self.points = points
     self.__create_indices__()
     self.__calculate_transformation_matrices__()
@@ -67,6 +70,15 @@ class Line ():
               value = 0.05
           self.sh.set_uniform("curve_percent", value)
           self.curve_percent = value
+  
+  def set_cylinder_percent(self, value):
+      if self.sh:
+          if value > 0.9:
+              value = 0.9
+          if value < 0.01:
+              value = 0.01
+          self.sh.set_uniform("cylinder_percent", value)
+          self.cylinder_percent = value
 
   def get_line_thickness(self):
       return self.thickness
@@ -186,45 +198,49 @@ class Line ():
     height = glm.length(v2)
 
     torus_angle = Utils.calculate_torus_angle(v2,v3)
-    if torus_angle == 0:#rever isso aqui
-      return 0.0
+    torus_point = 0 
+    torus_center = 0
+    if torus_angle == 0:
+      torus_point = self.matrices[id]*glm.vec4(-in_radius, height, 0, 1)
+      torus_center = self.matrices[id]*glm.vec4(0,height,0,1)
+    else:
 
-    R = d2*(1/math.tan(torus_angle/2))
+      R = d2*(1/math.tan(torus_angle/2))
 
-    phi = (1/(1.0-0.1))*torus_angle*(1.0 - 0.1)
+      phi = (1/(1.0-0.1))*torus_angle*(1.0 - 0.1)
 
-    x = -(-R + (R + in_radius)*math.cos(phi))
-    y = height - d2 + (R + in_radius)*math.sin(phi)
-    z = in_radius * math.sin(theta)
-    w = 1.0
+      x = -(-R + (R + in_radius)*math.cos(phi))
+      y = height - d2 + (R + in_radius)*math.sin(phi)
+      z = in_radius * math.sin(theta)
+      w = 1.0
 
-    torus_point = self.matrices[id]*glm.vec4(x,y,z,w)
+      torus_point = self.matrices[id]*glm.vec4(x,y,z,w)
 
-    x = -(-R + (R)*math.cos(phi))
-    y = height - d2 + (R)*math.sin(phi)
-    z = 0
-    w = 1.0
+      x = -(-R + (R)*math.cos(phi))
+      y = height - d2 + (R)*math.sin(phi)
+      z = 0
+      w = 1.0
 
-    torus_center = self.matrices[id]*glm.vec4(x,y,z,w)
+      torus_center = self.matrices[id]*glm.vec4(x,y,z,w)
 
     #calculo de dois pontos do inicio do tramo seguinte
 
     cylinder_point = self.matrices[id+1]*glm.vec4(-in_radius, d2, 0, 1)
     cylinder_center = self.matrices[id+1]*glm.vec4(0,d2,0,1)
+    cylinder_top = self.matrices[id+1]*glm.vec4(0,glm.length(v3),0,1)
 
     vec1 = torus_point - torus_center
     vec2 = cylinder_point - cylinder_center
 
-    angle = Utils.calculate_torus_angle(vec2, vec1)
+    angle = Utils.calculate_torus_angle(vec1, vec2)
+ 
+    # x = -in_radius * math.cos(angle)
+    # y = d2
+    # z = in_radius * math.sin(angle)
+    # w = 1.0
 
-    #teste com correcao para saber para onde rotacionar    
-    x = -in_radius * math.cos(angle)
-    y = d2
-    z = in_radius * math.sin(angle)
-    w = 1.0
-
-    new_point = self.matrices[id+1]*glm.vec4(x,y,z,w)
-
+    # new_point = self.matrices[id+1]*glm.vec4(x,y,z,w)
+    
     # print("torus_point")
     # print(torus_point)
     # print("torus_center")
@@ -233,17 +249,28 @@ class Line ():
     # print(cylinder_point)
     # print("cylinder_center")
     # print(cylinder_center)
-    # print("new_torus_point")
+    # print("new_point_positivo")
     # print(new_point)
-    if Utils.is_vertix_equal(torus_point, new_point):
-      return angle
-    else:
-      x = -in_radius * math.cos(-angle)
-      y = d2
-      z = in_radius * math.sin(-angle)
-      w = 1.0
+    # x = -in_radius * math.cos(-angle)
+    # y = d2
+    # z = in_radius * math.sin(-angle)
+    # w = 1.0
 
-      new_point = self.matrices[id+1]*glm.vec4(x,y,z,w)
+    # new_point = self.matrices[id+1]*glm.vec4(x,y,z,w)
+    # print("new_point_negativo")
+    # print(new_point)
+    # print("\n")
+
+    cross = glm.cross(glm.normalize(glm.vec3(vec2)),glm.normalize(glm.vec3(vec1)))
+    cylinder_dir = cylinder_top - cylinder_point
+    signal = glm.dot(glm.normalize(glm.vec3(cylinder_dir)), cross)
+    if signal >= 0:
+      # print("positivo")
+      # print("\n")
+      return angle
+    else:  
+      # print("negativo")
+      # print("\n")
       return -angle
     
   def __add_coord_to_point__(self, point, angle):

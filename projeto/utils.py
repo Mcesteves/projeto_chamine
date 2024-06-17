@@ -6,11 +6,11 @@ import numpy as np
 class Utils:
   @staticmethod
   def is_vertix_equal(v1, v2):
-    if abs(v1.x - v2.x) > 0.0001:
+    if abs(v1.x - v2.x) > 0.000000001:
       return False
-    if abs(v1.y - v2.y)> 0.0001:
+    if abs(v1.y - v2.y)> 0.0000000001:
       return False
-    if abs(v1.z - v2.z)> 0.0001:
+    if abs(v1.z - v2.z)> 0.0000000001:
       return False
     return True
     
@@ -88,4 +88,34 @@ class Utils:
       l.append(0.0)
       i = i + 3    
     return l
+  
+  @staticmethod
+  def get_m_and_mins(points):
+    lx = []
+    ly = []
+    lz = []
+    i = 0
+    while i < len(points)/3:
+      lx.append(points[3*i])
+      ly.append(points[3*i+1])
+      lz.append(points[3*i+2])
+      i +=1
+    Mx = max(lx) - min(lx)
+    My = max(ly) - min(ly)
+    Mz = max(lz) - min(lz)
+
+    return (max([Mx, My, Mz]), min(lx), min(ly), min(lz))
+  
+  @staticmethod
+  def normalize_line(params, points):
+    i = 0
+    while i < len(points)/3:
+      points[3*i] = (points[3*i] - params[1])/params[0]
+      points[3*i+1] = (points[3*i + 1] - params[2])/params[0]
+      points[3*i+2] = (points[3*i + 2] - params[3])/params[0]
+      i +=1
+
+
+    
+
   

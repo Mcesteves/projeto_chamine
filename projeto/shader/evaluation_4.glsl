@@ -9,6 +9,7 @@ uniform mat4 mv;
 uniform mat4 mn;
 uniform mat4 mvp;
 uniform float thickness;
+uniform float cylinder_percent;
 
 patch in data{
 	mat4 transformation;
@@ -41,7 +42,6 @@ void main(){
 	vec4 vpos;
 	vec4 vnorm;
 	float phi;
-	float cylinder_percent = 0.1f;
 	float k = mesh_data.height - mesh_data.d2 - mesh_data.d1;
 
 	if(mesh_data.no_curve == 0){
