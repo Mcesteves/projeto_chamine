@@ -276,9 +276,22 @@ def main():
     print("OpenGL version: ",glGetString(GL_VERSION))
 
     initialize(win)
+    prev_time = 0.0
+    crnt_time = 0.0
+    time_diff = 0.0
+    counter = 0
 
     # Loop until the user closes the window
     while not glfw.window_should_close(win):
+        crnt_time = glfw.get_time()
+        time_diff = crnt_time - prev_time
+        counter += 1
+        if time_diff >= 1.0/30.0:
+           fps = str((1.0/time_diff)*counter)
+           new_title = "Projeto Final - FPS "+ fps
+           glfw.set_window_title(win, new_title)
+           prev_time = crnt_time
+           counter = 0
         # Render here, e.g. using pyOpenGL
         display()
 

@@ -3,6 +3,8 @@ from OpenGL.GL import *
 import glm
 import numpy as np
 
+from line import Line
+
 class Utils:
   @staticmethod
   def is_vertix_equal(v1, v2):
@@ -114,6 +116,39 @@ class Utils:
       points[3*i+1] = (points[3*i + 1] - params[2])/params[0]
       points[3*i+2] = (points[3*i + 2] - params[3])/params[0]
       i +=1
+
+  @staticmethod
+  def read_file(camera, thickness):
+    lines = []
+    coords = []
+    props = []
+    f = open("PITUBA_IMEX_STRMLN_120.txt", "r")
+    while(True):
+      c = f.readline()
+      if not c:
+        break
+      l = c.split()
+      if l and l[0] == "VCOUNT":
+        i = 0
+        while i < int(l[1]):
+          line = f.readline()
+          nums = line.split()
+          coords.append(float(nums[0].strip(',')))
+          coords.append(float(nums[1].strip(',')))
+          coords.append(float(nums[2].strip(',')))
+          i +=1
+        c = f.readline()
+        l = c.split()
+        if l and l[0] == "PROP":
+          i = 0
+          while i < int(l[2]):
+            line = f.readline()
+            num = line.split()
+            props.append(float(num[0].strip(',')))
+            i +=1
+          lines.append(Line(coords, props, camera, thickness=thickness))
+    f.close()
+    return lines
 
 
     
