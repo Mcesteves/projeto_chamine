@@ -145,14 +145,16 @@ void main(){
 		if(u >= a[0] && u < b[0]){
 			color_1 = vec4(a[1], a[2], a[3], 1.0f);
 			color_2 = vec4(b[1], b[2], b[3], 1.0f);	
+			u = (u - a[0])/(b[0] - a[0]);
+			break;
 		}
 		i++;
 	}
-	
-	v.color.r = color_1.r + (color_2.r - color_1.r) * t;
-	v.color.g = color_1.g + (color_2.g - color_1.g) * t;
-	v.color.b = color_1.b + (color_2.b - color_1.b) * t;
-	v.color.a = color_1.a + (color_2.a - color_1.a) * t;
+
+	v.color.r = color_1.r + (color_2.r - color_1.r) * u;
+	v.color.g = color_1.g + (color_2.g - color_1.g) * u;
+	v.color.b = color_1.b + (color_2.b - color_1.b) * u;
+	v.color.a = color_1.a + (color_2.a - color_1.a) * u;
 
 	gl_Position = mvp * vpos;
 }
