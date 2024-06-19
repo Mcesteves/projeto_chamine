@@ -4,10 +4,7 @@ import numpy as np
 class TexBuffer():
   def __init__ (self, varname, array, type):
     self.varname = varname
-    if type == "matrix":
-        self.format = GL_RGBA32F
-    else:
-       self.format = GL_R32F
+    self.format = type
     self.buffer = glGenBuffers(1)
     self.tex = glGenTextures(1)
     self.__set_data__(array)

@@ -7,7 +7,7 @@ class Camera ():
     self.ortho = False
     self.fov_y = 45
     self.z_near = 0.01
-    self.z_far = 2000
+    self.z_far = 1000
     self.center = glm.vec3(0,0,0)
     self.eye = glm.vec3(x,y,z)
     self.up = glm.vec3(0,1,0)

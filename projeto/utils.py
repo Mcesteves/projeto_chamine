@@ -3,8 +3,6 @@ from OpenGL.GL import *
 import glm
 import numpy as np
 
-from line import Line
-
 class Utils:
   @staticmethod
   def is_vertix_equal(v1, v2):
@@ -116,26 +114,42 @@ class Utils:
       points[3*i+1] = (points[3*i + 1] - params[2])/params[0]
       points[3*i+2] = (points[3*i + 2] - params[3])/params[0]
       i +=1
-
+    
   @staticmethod
-  def read_file(camera, thickness):
+  def read_file(filename):
+    max_prop = None
+    min_prop = None
+    max_x = None
+    min_x = None
+    max_y = None
+    min_y = None
+    max_z = None
+    min_z = None
     lines = []
     coords = []
     props = []
-    f = open("PITUBA_IMEX_STRMLN_120.txt", "r")
+    f = open(filename, "r")
     while(True):
       c = f.readline()
       if not c:
         break
       l = c.split()
       if l and l[0] == "VCOUNT":
+        coords = []
+        props = []
         i = 0
         while i < int(l[1]):
           line = f.readline()
           nums = line.split()
-          coords.append(float(nums[0].strip(',')))
-          coords.append(float(nums[1].strip(',')))
-          coords.append(float(nums[2].strip(',')))
+          coords.append(float(nums[1]))
+          max_x = Utils.return_max(max_x, float(nums[1]))
+          min_x = Utils.return_min(min_x, float(nums[1]))
+          coords.append(float(nums[2]))
+          max_y = Utils.return_max(max_y, float(nums[2]))
+          min_y = Utils.return_min(min_y, float(nums[2]))
+          coords.append(float(nums[3]))
+          max_z = Utils.return_max(max_z, float(nums[3]))
+          min_z = Utils.return_min(min_z, float(nums[3]))
           i +=1
         c = f.readline()
         l = c.split()
@@ -144,11 +158,89 @@ class Utils:
           while i < int(l[2]):
             line = f.readline()
             num = line.split()
-            props.append(float(num[0].strip(',')))
+            props.append(float(num[1]))
+            max_prop = Utils.return_max(max_prop, float(num[1]))
+            min_prop = Utils.return_min(min_prop, float(num[1]))
             i +=1
-          lines.append(Line(coords, props, camera, thickness=thickness))
+          lines.append([coords, props])
     f.close()
+    norm_x = max_x - min_x
+    norm_y = max_y - min_y
+    norm_z = max_z - min_z
+    return (lines, min_prop, max_prop, norm_x, norm_y, norm_z, min_x, min_y, min_z)
+  
+  @staticmethod
+  def normalize_data(data):
+    lines = data[0]  
+    for line_data in lines:
+      i = 0
+      points = line_data[0]
+      props = line_data[1]
+      while i < len(points)/3:
+        points[3*i] = (points[3*i] - data[6])/data[3]
+        points[3*i+1] = (points[3*i + 1] - data[7])/data[4]
+        points[3*i+2] = (points[3*i + 2] - data[8])/data[5]
+        props[i] = (props[i] - data[1])/(data[2] - data[1])
+        i +=1
     return lines
+  
+  @staticmethod
+  def create_color_scale():
+    scale = []
+    scale.append(0.0)
+    scale.append(14.0/255.0)
+    scale.append(14.0/255.0)
+    scale.append(120.0/255.0)
+    scale.append(0.17)
+    scale.append(62.0/255.0)
+    scale.append(117.0/255.0)
+    scale.append(207.0/255.0)
+    scale.append(0.30)
+    scale.append(91.0/255.0)
+    scale.append(190.0/255.0)
+    scale.append(243.0/255.0)
+    scale.append(0.43)
+    scale.append(175.0/255.0)
+    scale.append(237.0/255.0)
+    scale.append(234.0/255.0)
+    scale.append(0.50)
+    scale.append(229.0/255.0)
+    scale.append(241.0/255.0)
+    scale.append(196.0/255.0)
+    scale.append(0.59)
+    scale.append(244.0/255.0)
+    scale.append(213.0/255.0)
+    scale.append(130.0/255.0)
+    scale.append(0.71)
+    scale.append(237.0/255.0)
+    scale.append(158.0/255.0)
+    scale.append(80.0/255.0)
+    scale.append(0.85)
+    scale.append(204.0/255.0)
+    scale.append(90.0/255.0)
+    scale.append(41.0/255.0)
+    scale.append(1.0)
+    scale.append(150.0/255.0)
+    scale.append(20.0/255.0)
+    scale.append(30.0/255.0)
+    return scale
+  
+  def return_max(current_max, value):
+    if current_max == None:
+      return value
+    elif current_max < value:
+      return value
+    else:
+      return current_max
+    
+  def return_min(current_min, value):
+    if current_min == None:
+      return value
+    elif current_min > value:
+      return value
+    else:
+      return current_min
+    
 
 
     

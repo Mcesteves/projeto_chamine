@@ -5,72 +5,30 @@ from camera import *
 from line import *
 
 def initialize (win):
-  glClearColor(0,0,0,1)
+  glClearColor(1,1,1,1)
   glEnable(GL_DEPTH_TEST)
-  glPolygonMode(GL_FRONT, GL_LINE)
+  #glPolygonMode(GL_FRONT, GL_LINE)
   #glEnable(GL_CULL_FACE)
   #glCullFace(GL_FRONT); 
 
-  Utils.read_file()
+  data = Utils.read_file("teste.txt")
+  line_data = Utils.normalize_data(data)
 
   global camera
-  camera = Camera(0, 0, 15)
+  camera = Camera(0, 0, 1)
   arcball = camera.create_arcball()
   arcball.attach(win)
 
-  global curve
-  curve = Line([     
-     0.0, 0.0, 0.0,
-     0.0, 0.0, 2.0,
-     0.0, 0.0, 5.0,
-     0.0, 0.0, 7.0,
-     8.0, 1.0, 3.0,
-     8.0, 4.0, 0.0,
-     -5.0, 8.0, 0.0,
-    #  -10.0, 8.0, -5.0,
-    #  2.0, 4.0, 0.0,
-    #  6.0, -10.0, 2.0,
-    #  0.0, 0.0, 0.0,
-    #  -8.0, 1.0, 3.0,
-    #  -5.0, 0.0, 0.0,
-    #  -10, -6.0, 5.0,
-    #  5.0, -3.0, -5.0,
-    #  1.0, 7.0, 9.0,
-    #  2.0, 1.0, 15.0,
-    #  2.0, 5.0, 0.0,
-    #  2.0, 8.0, 0.0,
-    #  2.0, -2.0, 0.0,
-    #  -2.0, -1.0, 0.0,
-     ],
-     [
-     1.0, 0.0, 0.0, 1.0,
-     1.0, 1.0, 0.0, 1.0,
-     1.0, 0.0, 1.0, 1.0,
-     0.0, 1.0, 0.0, 1.0,
-     0.0, 0.0, 1.0, 1.0,
-     1.0, 0.0, 0.0, 1.0,
-     1.0, 0.0, 0.0, 1.0,
-    #  1.0, 0.0, 0.0, 1.0,
-    #  1.0, 0.0, 0.0, 1.0,
-    #  1.0, 0.0, 0.0, 1.0,
-    #  1.0, 0.0, 0.0, 1.0,
-    #  1.0, 0.0, 0.0, 1.0,
-    #  1.0, 0.0, 0.0, 1.0,
-    #  1.0, 0.0, 0.0, 1.0,
-    #  1.0, 0.0, 0.0, 1.0,
-    #  1.0, 0.0, 0.0, 1.0,
-    #  1.0, 0.0, 0.0, 1.0,
-    #  1.0, 0.0, 0.0, 1.0,
-    #  1.0, 0.0, 0.0, 1.0,
-    #  1.0, 0.0, 0.0, 1.0,
-    #  1.0, 0.0, 0.0, 1.0
-     ], camera, subdivision=8, thickness=0.2, cylinder_percent=0.9)
-  
-  
+  global lines
+  lines = []
+  for line in line_data:
+     lines.append(Line(line[0], line[1], camera, thickness=0.003))
 
 def display ():
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-  curve.draw()
+  
+  for line in lines:
+    line.draw()
 
 def resize(win, width, height):
    glViewport(0, 0, width, height)
@@ -117,7 +75,8 @@ def main():
            prev_time = crnt_time
            counter = 0
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        curve.draw()
+        for line in lines:
+            line.draw()
 
         # Swap front and back buffers
         glfw.swap_buffers(win)

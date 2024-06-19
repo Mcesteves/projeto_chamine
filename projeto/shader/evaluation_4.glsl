@@ -4,12 +4,13 @@ layout (quads) in;
 
 #define pi 3.14159265
 
-const vec4 leye = vec4(2.0f, 3.0f, 5.0f, 1.0f);
+const vec4 leye = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 uniform mat4 mv;
 uniform mat4 mn;
 uniform mat4 mvp;
 uniform float thickness;
 uniform float cylinder_percent;
+uniform samplerBuffer color_scale;
 
 patch in data{
 	mat4 transformation;
@@ -26,7 +27,7 @@ patch in data{
 	float pre_angle;
 } mesh_data;
 
-patch in vec4 color[3];
+patch in float prop[3];
 
 out data {
 	vec3 neye;
@@ -92,6 +93,7 @@ void main(){
 	float c = (mesh_data.angle)*mesh_data.out_radius;
 	float previous_c = mesh_data.pre_angle*mesh_data.d1*(1/tan(mesh_data.pre_angle/2));
 	vec4 color_1, color_2;
+	float prop_1, prop_2;
 
 	if(change_color == 0){
 		if(mesh_data.no_curve == 1)
@@ -116,8 +118,8 @@ void main(){
 				t = ((((gl_TessCoord.y - cylinder_percent)*(1/((1-cylinder_percent)/2.0f)))*c/2.0f) + h1 - c/2.0f)/h1;
 			}
 		}
-		color_1 = color[0];
-		color_2 = color[1];
+		prop_1 = prop[0];
+		prop_2 = prop[1];
 	}
 	else{
 		float h2;
@@ -131,8 +133,20 @@ void main(){
 			h2 = mesh_data.next_height - mesh_data.next_d2 + c2/2.0f - mesh_data.d2 + c/2.0f;
 			t = (((gl_TessCoord.y - cylinder_percent -((1-cylinder_percent)/2.0f))*(1/((1 - cylinder_percent)/2.0f)))*c/2.0f)/h2;
 		}	
-		color_1 = color[1];
-		color_2 = color[2];		
+		prop_1 = prop[1];
+		prop_2 = prop[2];	
+	}
+
+	float u = prop_1 + (prop_2 - prop_1) * t;
+	int i = 0;
+	while( i < textureSize(color_scale) - 1){
+		vec4 a = texelFetch(color_scale, i);
+		vec4 b = texelFetch(color_scale, i+1);
+		if(u >= a[0] && u < b[0]){
+			color_1 = vec4(a[1], a[2], a[3], 1.0f);
+			color_2 = vec4(b[1], b[2], b[3], 1.0f);	
+		}
+		i++;
 	}
 	
 	v.color.r = color_1.r + (color_2.r - color_1.r) * t;

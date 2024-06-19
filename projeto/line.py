@@ -4,27 +4,30 @@ import numpy as np
 import glm
 
 from shader import Shader
+from texbuffer import TexBuffer
 from utils import *
 
 class Line ():
-  def __init__(self, points, colors, camera, thickness = 0.05, subdivision = 4, curve_percent = 0.15, cylinder_percent = 0.1):
+  def __init__(self, points, colors, camera, thickness = 0.05, subdivision = 32, curve_percent = 0.15, cylinder_percent = 0.1):
     
     if camera == None:
        print("Erro")
        return
     
     self.camera = camera
+    self.scale = TexBuffer("color_scale", np.array(Utils.create_color_scale(), dtype= "float32"), GL_RGBA32F)
     self.__set_shader__()
     self.set_line_thickness(thickness)
     self.set_percent(curve_percent)
     self.set_subdivision(subdivision)
     self.set_cylinder_percent(cylinder_percent)
+    self.scale.load(self.sh)
 
     self.indices = []
     self.points = []
     self.angles = []
-    # results = Utils.get_m_and_mins(points)
-    # Utils.normalize_line(results, points)
+    #results = Utils.get_m_and_mins(points)
+    #Utils.normalize_line(results, points)
     self.points = points
     self.__create_indices__()
     self.__calculate_transformation_matrices__()
@@ -32,21 +35,19 @@ class Line ():
     self.__build_points_array__()
     self.angles.clear()
     self.colors = colors
-
     self.points = self.__add_colors__()
-    
     self.points = np.array(self.points, dtype= "float32")
     self.indices = np.array(self.indices, dtype= "uint32")
-   
+
     glPatchParameteri(GL_PATCH_VERTICES, 5)
     self.vao = glGenVertexArrays(1)
     glBindVertexArray(self.vao)
     self.vbo = glGenBuffers(1)
     glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
     glBufferData(GL_ARRAY_BUFFER, self.points.nbytes, self.points, GL_STATIC_DRAW)
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 32, None)
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 20, None)
     glEnableVertexAttribArray(0)
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 32, ctypes.c_void_p(16))
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 20, ctypes.c_void_p(16))
     glEnableVertexAttribArray(1)
     self.ebo = glGenBuffers(1)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ebo)
@@ -291,10 +292,7 @@ class Line ():
       l.append(self.points[4*i+1])
       l.append(self.points[4*i+2])
       l.append(self.points[4*i+3])
-      l.append(self.colors[4*i])
-      l.append(self.colors[4*i+1])
-      l.append(self.colors[4*i+2])
-      l.append(self.colors[4*i+3])
+      l.append(self.colors[i])
       i+=1
 
     return l
