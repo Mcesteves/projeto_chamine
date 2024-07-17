@@ -5,16 +5,6 @@ import numpy as np
 
 class Utils:
   @staticmethod
-  def is_vertix_equal(v1, v2):
-    if abs(v1.x - v2.x) > 0.000000001:
-      return False
-    if abs(v1.y - v2.y)> 0.0000000001:
-      return False
-    if abs(v1.z - v2.z)> 0.0000000001:
-      return False
-    return True
-    
-  @staticmethod
   def calculate_torus_angle(c1, c2):  
       c1 = glm.normalize(c1)
       c2 = glm.normalize(c2)  
@@ -25,22 +15,6 @@ class Utils:
         dot = -1
       angle = math.acos(dot)
       return angle
-  
-  #Remove pontos adjacentes iguais
-  @staticmethod 
-  def remove_repeated_sequence(points):
-    l = []
-    i = 0
-    while i < len(points) - 3:
-      if((points[i], points[i+1], points[i+2]) != (points[i+3], points[i+4], points[i+5])):
-        l.append(points[i])
-        l.append(points[i+1])
-        l.append(points[i+2])
-      i = i + 3    
-    l.append(points[i])
-    l.append(points[i+1])
-    l.append(points[i+2])
-    return l
   
   #calcula matriz de translacao
   @staticmethod
@@ -57,6 +31,8 @@ class Utils:
   def set_rotation_matrix(v0, v1, v2):
     y = v1 - v0
     x = v2 - v1
+    if(y == glm.vec3(0)):
+      y = glm.vec3(0.0, 1.0, 0.0)
     if(x == glm.vec3(0)):
       x = glm.vec3(1.0, 0.0, 0.0)
     z = glm.cross(glm.normalize(x), y)
@@ -105,15 +81,6 @@ class Utils:
     Mz = max(lz) - min(lz)
 
     return (max([Mx, My, Mz]), min(lx), min(ly), min(lz))
-  
-  @staticmethod
-  def normalize_line(params, points):
-    i = 0
-    while i < len(points)/3:
-      points[3*i] = (points[3*i] - params[1])/params[0]
-      points[3*i+1] = (points[3*i + 1] - params[2])/params[0]
-      points[3*i+2] = (points[3*i + 2] - params[3])/params[0]
-      i +=1
     
   @staticmethod
   def read_file(filename):
@@ -128,13 +95,18 @@ class Utils:
     lines = []
     coords = []
     props = []
+    inj_lines = 0
     f = open(filename, "r")
     while(True):
       c = f.readline()
       if not c:
         break
       l = c.split()
-      if l and l[0] == "VCOUNT":
+      if l and l[0] == "INJ_LINES":
+        inj_lines = int(l[1])
+      elif l and l[0] == "LINE" and int(l[1]) < inj_lines:
+        c = f.readline()
+        l = c.split()
         coords = []
         props = []
         i = 0
@@ -170,7 +142,7 @@ class Utils:
     return (lines, min_prop, max_prop, norm_x, norm_y, norm_z, min_x, min_y, min_z)
   
   @staticmethod
-  def normalize_data(data):
+  def normalize_data(data, max_limit):
     lines = data[0]  
     for line_data in lines:
       i = 0
@@ -180,7 +152,7 @@ class Utils:
         points[3*i] = (points[3*i] - data[6])/data[3]
         points[3*i+1] = (points[3*i + 1] - data[7])/data[4]
         points[3*i+2] = (points[3*i + 2] - data[8])/data[5]
-        props[i] = (props[i] - data[1])/(data[2] - data[1])
+        props[i] = (props[i])/(max_limit)
         i +=1
     return lines
   
@@ -188,41 +160,59 @@ class Utils:
   def create_color_scale():
     scale = []
     scale.append(0.0)
-    scale.append(14.0/255.0)
-    scale.append(14.0/255.0)
-    scale.append(120.0/255.0)
-    scale.append(0.17)
-    scale.append(62.0/255.0)
-    scale.append(117.0/255.0)
-    scale.append(207.0/255.0)
-    scale.append(0.30)
-    scale.append(91.0/255.0)
-    scale.append(190.0/255.0)
-    scale.append(243.0/255.0)
-    scale.append(0.43)
-    scale.append(175.0/255.0)
-    scale.append(237.0/255.0)
-    scale.append(234.0/255.0)
-    scale.append(0.50)
-    scale.append(229.0/255.0)
-    scale.append(241.0/255.0)
-    scale.append(196.0/255.0)
-    scale.append(0.59)
-    scale.append(244.0/255.0)
-    scale.append(213.0/255.0)
-    scale.append(130.0/255.0)
-    scale.append(0.71)
-    scale.append(237.0/255.0)
-    scale.append(158.0/255.0)
-    scale.append(80.0/255.0)
-    scale.append(0.85)
-    scale.append(204.0/255.0)
-    scale.append(90.0/255.0)
-    scale.append(41.0/255.0)
-    scale.append(1.0)
+    scale.append(2.0/255.0)
+    scale.append(96.0/255.0)
+    scale.append(203.0/255.0)
+
+    scale.append(0.12)
+    scale.append(0.0/255.0)
     scale.append(150.0/255.0)
-    scale.append(20.0/255.0)
-    scale.append(30.0/255.0)
+    scale.append(196.0/255.0)
+
+    scale.append(0.26)
+    scale.append(67.0/255.0)
+    scale.append(174.0/255.0)
+    scale.append(57.0/255.0)
+
+    scale.append(0.39)
+    scale.append(155.0/255.0)
+    scale.append(181.0/255.0)
+    scale.append(0.0/255.0)
+    
+    scale.append(0.50)
+    scale.append(207.0/255.0)
+    scale.append(184.0/255.0)
+    scale.append(42.0/255.0)
+
+    scale.append(0.68)
+    scale.append(245.0/255.0)
+    scale.append(184.0/255.0)
+    scale.append(0.0/255.0)
+
+    scale.append(0.75)
+    scale.append(255.0/255.0)
+    scale.append(158.0/255.0)
+    scale.append(0.0/255.0)
+
+    scale.append(0.83)
+    scale.append(255.0/255.0)
+    scale.append(128.0/255.0)
+    scale.append(0.0/255.0)
+
+    scale.append(0.9)
+    scale.append(255.0/255.0)
+    scale.append(87.0/255.0)
+    scale.append(0.0/255.0)
+
+    scale.append(1.0)
+    scale.append(255.0/255.0)
+    scale.append(40.0/255.0)
+    scale.append(40.0/255.0)
+
+    scale.append(1.5)
+    scale.append(200.0/255.0)
+    scale.append(200.0/255.0)
+    scale.append(200.0/255.0)
     return scale
   
   def return_max(current_max, value):

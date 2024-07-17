@@ -36,6 +36,26 @@ out data {
 	vec4 color;
 } v;
 
+
+vec3 calculateNormal(float theta, float phi){
+	
+	float parcial_x_theta = thickness*cos(phi)*sin(theta);
+	float parcial_x_phi = thickness*cos(theta)*sin(phi);
+
+	float parcial_y_theta = -thickness*sin(phi)*sin(theta);
+	float parcial_y_phi = cos(phi)*(thickness*cos(theta) + mesh_data.out_radius);
+
+	float parcial_z_theta = thickness*cos(theta);
+	float parcial_z_phi = 0;
+
+	vec3 par_theta_coord = vec3(parcial_x_theta, parcial_y_theta, parcial_z_theta);
+	vec3 par_phi_coord = vec3(parcial_x_phi, parcial_y_phi, parcial_z_phi);
+
+	vec3 vnorm = cross(par_theta_coord, par_phi_coord);
+
+	return vnorm;
+}
+
 void main(){
 	int is_curve = 0;
 	int change_color = 0;
@@ -60,9 +80,7 @@ void main(){
 		vpos.z = thickness * sin(theta);
 		vpos.w = 1.0f;
 
-		vnorm.x = -cos(theta)*cos(phi);
-		vnorm.y = sin(phi)*cos(theta);
-		vnorm.z = sin(theta);
+		vnorm = vec4(calculateNormal(theta, phi), 1.0f);
 	}
 	else {
 		vpos.x = -thickness * cos(theta);
@@ -146,6 +164,12 @@ void main(){
 			color_1 = vec4(a[1], a[2], a[3], 1.0f);
 			color_2 = vec4(b[1], b[2], b[3], 1.0f);	
 			u = (u - a[0])/(b[0] - a[0]);
+			break;
+		}
+		else if(u > b[0] && i == textureSize(color_scale) - 2){
+			color_1 = vec4(a[1], a[2], a[3], 1.0f);
+			color_2 = vec4(b[1], b[2], b[3], 1.0f);	
+			u = 1.0f;
 			break;
 		}
 		i++;

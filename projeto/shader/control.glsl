@@ -26,6 +26,9 @@ patch out data{
 patch out float prop[3];
 
 mat4 createOrthogonalBasis(vec3 d, vec3 y){
+	if(y == vec3(0.0f)){
+		y = vec3(0.0f, 1.0f, 1.0f);
+	}
 	if(d == vec3(0.0f)){
 		d = vec3(1.0f, 0.0f, 0.0f);
 	}

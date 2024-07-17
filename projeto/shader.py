@@ -21,9 +21,6 @@ class Shader:
 
   def attach_fragment_shader (self, filename):
     self.shaders.append(self.__create_shader(GL_FRAGMENT_SHADER, filename))
-
-  # def attach_geometry_shader (self, filename):
-  #   self.shaders.append(self.__create_shader(GL_GEOMETRY_SHADER, filename))
     
   def attach_tesselation_shader (self, control_filename, evaluation_filename):
     self.shaders.append(self.__create_shader(GL_TESS_CONTROL_SHADER,control_filename))

@@ -8,10 +8,18 @@ from texbuffer import TexBuffer
 from utils import *
 
 class Line ():
-  def __init__(self, points, colors, camera, thickness = 0.05, subdivision = 32, curve_percent = 0.15, cylinder_percent = 0.1):
+  def __init__(self, points, props, camera, thickness = 0.05, subdivision = 32, curve_percent = 0.15, cylinder_percent = 0.1):
+    
+    if points == None:
+       print("O parametro points deve ser informado")
+       return
+    
+    if props == None:
+       print("O parametro props deve ser informado")
+       return
     
     if camera == None:
-       print("Erro")
+       print("O parametro camera deve ser informado")
        return
     
     self.camera = camera
@@ -26,16 +34,14 @@ class Line ():
     self.indices = []
     self.points = []
     self.angles = []
-    #results = Utils.get_m_and_mins(points)
-    #Utils.normalize_line(results, points)
     self.points = points
     self.__create_indices__()
     self.__calculate_transformation_matrices__()
     self.points = Utils.vec3_to_vec4(points)
     self.__build_points_array__()
     self.angles.clear()
-    self.colors = colors
-    self.points = self.__add_colors__()
+    self.props = props
+    self.points = self.__add_props__()
     self.points = np.array(self.points, dtype= "float32")
     self.indices = np.array(self.indices, dtype= "uint32")
 
@@ -112,7 +118,7 @@ class Line ():
   def __set_shader__(self):
     self.sh = Shader()
     self.sh.attach_vertex_shader("shader/vertex.glsl")
-    self.sh.attach_tesselation_shader("shader/control_5.glsl", "shader/evaluation_4.glsl")
+    self.sh.attach_tesselation_shader("shader/control.glsl", "shader/evaluation.glsl")
     self.sh.attach_fragment_shader("shader/fragment.glsl")
     self.sh.link() 
     self.sh.use_program()
@@ -234,44 +240,13 @@ class Line ():
     vec2 = cylinder_point - cylinder_center
 
     angle = Utils.calculate_torus_angle(vec1, vec2)
- 
-    # x = -in_radius * math.cos(angle)
-    # y = d2
-    # z = in_radius * math.sin(angle)
-    # w = 1.0
-
-    # new_point = self.matrices[id+1]*glm.vec4(x,y,z,w)
-    
-    # print("torus_point")
-    # print(torus_point)
-    # print("torus_center")
-    # print(torus_center)
-    # print("cylinder_point")
-    # print(cylinder_point)
-    # print("cylinder_center")
-    # print(cylinder_center)
-    # print("new_point_positivo")
-    # print(new_point)
-    # x = -in_radius * math.cos(-angle)
-    # y = d2
-    # z = in_radius * math.sin(-angle)
-    # w = 1.0
-
-    # new_point = self.matrices[id+1]*glm.vec4(x,y,z,w)
-    # print("new_point_negativo")
-    # print(new_point)
-    # print("\n")
 
     cross = glm.cross(glm.normalize(glm.vec3(vec2)),glm.normalize(glm.vec3(vec1)))
     cylinder_dir = cylinder_top - cylinder_point
     signal = glm.dot(glm.normalize(glm.vec3(cylinder_dir)), cross)
     if signal >= 0:
-      # print("positivo")
-      # print("\n")
       return angle
     else:  
-      # print("negativo")
-      # print("\n")
       return -angle
     
   def __add_coord_to_point__(self, point, angle):
@@ -284,7 +259,7 @@ class Line ():
       self.points[index*4+3] = self.angles[i]
       i+=1
 
-  def __add_colors__(self):
+  def __add_props__(self):
     l = []
     i = 0
     while i < len(self.points)/4:
@@ -292,7 +267,7 @@ class Line ():
       l.append(self.points[4*i+1])
       l.append(self.points[4*i+2])
       l.append(self.points[4*i+3])
-      l.append(self.colors[i])
+      l.append(self.props[i])
       i+=1
 
     return l

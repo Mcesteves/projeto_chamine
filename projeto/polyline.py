@@ -12,10 +12,8 @@ class Polyline ():
         self.vbo = glGenBuffers(1)
         glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
         glBufferData(GL_ARRAY_BUFFER, self.points.nbytes, self.points, GL_STATIC_DRAW)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 24, None)
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, None)
         glEnableVertexAttribArray(0)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 24, ctypes.c_void_p(12))
-        glEnableVertexAttribArray(1)
 
     def draw(self):
         glBindVertexArray(self.vao)
@@ -29,9 +27,6 @@ class Polyline ():
             l.append(points[3*i])
             l.append(points[3*i+1])
             l.append(points[3*i+2])
-            l.append(t.x)
-            l.append(t.y)
-            l.append(t.z)
             i += 1
         return l
 
