@@ -11,18 +11,35 @@ def initialize (win):
   #glEnable(GL_CULL_FACE)
   #glCullFace(GL_FRONT); 
 
-  data = Utils.read_file("teste.txt")
-  line_data = Utils.normalize_data(data)
-
   global camera
-  camera = Camera(0, 0, 1)
+  camera = Camera(0, 0, 10)
   arcball = camera.create_arcball()
   arcball.attach(win)
 
   global lines
   lines = []
-  for line in line_data:
-     lines.append(Line(line[0], line[1], camera, thickness=0.003))
+
+  lines.append(Line(
+     [
+        0.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        3.0, 3.0, 2.0,
+        5.0, 0.0, 0.0,
+        8.0, 1.0, 3.0,
+        8.0, 4.0, 0.0,
+        -5.0, 8.0, 0.0,
+        -10.0, 8.0, -5.0
+     ],
+     [
+        0.0,
+        0.1,
+        0.25,
+        0.34,
+        0.5,
+        0.58,
+        0.7,
+        0.9
+     ], camera, thickness=0.2))
 
 def display ():
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
